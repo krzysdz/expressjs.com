@@ -20,7 +20,7 @@ These routing methods specify a callback function (sometimes called "handler fun
 
 In fact, the routing methods can have more than one callback function as arguments.
 With multiple callback functions, it is important to provide `next` as an argument to the callback function and then call `next()` within the body of the function to hand off control
-to the next callback.  
+to the next callback.
 
 The following code is an example of a very basic route.
 
@@ -240,6 +240,14 @@ In Express 4.x, <a href="https://github.com/expressjs/express/issues/2495">the `
 {% endcapture %}
 
 {% include admonitions/warning.html content=warning-version %}
+
+In Express 5, wildcard parameters `*` can be thought of as a special case of `:` parameters that can match more than one path segment:
+
+```
+Route path: /files/*path
+Request URL: http://localhost:3000/files/images/logo.png
+req.params: { "path": [ "images", "logo.png" ] }
+```
 
 <h2 id="route-handlers">Route handlers</h2>
 
