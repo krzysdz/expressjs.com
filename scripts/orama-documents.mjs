@@ -106,7 +106,7 @@ export const getApi = async (lang) => {
           const fullPath = join(baseDir, file);
           const raw = await readFile(fullPath, 'utf-8');
           const { data, content } = matter(raw);
-          const pathSegment = relative(baseDir, fullPath).replace(/\.mdx?$/, '');
+          const pathSegment = relative(baseDir, fullPath).replace(/(\/index)?\.mdx?$/, '');
 
           return {
             title: data.title ?? basename(file).replace(/\.mdx?$/, ''),
