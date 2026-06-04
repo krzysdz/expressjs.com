@@ -35,7 +35,7 @@ export const getPages = async (lang) => {
       const fullPath = join(baseDir, file);
       const raw = await readFile(fullPath, 'utf-8');
       const { data, content } = matter(raw);
-      const pathSegment = relative(baseDir, fullPath).replace(/\.mdx?$/, '');
+      const pathSegment = relative(baseDir, fullPath).replace(/(?:\/index)?\.mdx?$/, '');
       const isResource = pathSegment.startsWith('resources');
 
       return {
@@ -58,7 +58,7 @@ export const getDocs = async (lang) => {
       const fullPath = join(baseDir, file);
       const raw = await readFile(fullPath, 'utf-8');
       const { data, content } = matter(raw);
-      const pathSegment = relative(baseDir, fullPath).replace(/\.mdx?$/, '');
+      const pathSegment = relative(baseDir, fullPath).replace(/(?:\/index)?\.mdx?$/, '');
 
       return {
         title: data.title ?? basename(file).replace(/\.mdx?$/, ''),
@@ -106,7 +106,7 @@ export const getApi = async (lang) => {
           const fullPath = join(baseDir, file);
           const raw = await readFile(fullPath, 'utf-8');
           const { data, content } = matter(raw);
-          const pathSegment = relative(baseDir, fullPath).replace(/\.mdx?$/, '');
+          const pathSegment = relative(baseDir, fullPath).replace(/(?:\/index)?\.mdx?$/, '');
 
           return {
             title: data.title ?? basename(file).replace(/\.mdx?$/, ''),
