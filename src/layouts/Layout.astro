@@ -46,6 +46,7 @@ const pageDescription = versionLabel
 // Blog and API content is not translated, so their canonical is the English
 // page and they emit no hreflang alternates.
 let canonicalPath = canonicalPathname ?? Astro.url.pathname;
+canonicalPath = canonicalPath.replace(/\.html$/, '');
 if (isBlogOrApi) {
   canonicalPath = replaceLanguageInPath(canonicalPath, 'en');
 }

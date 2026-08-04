@@ -30,7 +30,7 @@ const {
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
-const currentPath = Astro.url.pathname;
+const currentPath = Astro.url.pathname.replace(/\.html$/, '');
 const currentVersion = detectVersionFromUrl(currentPath, versions, defaultVersion);
 
 const submenus: SubmenuData[] = [];
