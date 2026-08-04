@@ -24,7 +24,6 @@ const {
 } = Astro.props;
 
 const pathname = Astro.url.pathname.replace(/\.html$/, '');
-const canonicalUrl = new URL(pathname, Astro.site || Astro.url.origin);
 const segments = pathname.split('/').filter(Boolean);
 const langSegment = segments[0] || 'en';
 const restSegments = segments.slice(1);
