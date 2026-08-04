@@ -5,6 +5,7 @@ description: Cookie session middleware
 
 import MiddlewareInfo from '@components/patterns/MiddlewareInfo/MiddlewareInfo.astro';
 import Alert from '@components/primitives/Alert/Alert.astro';
+import PackageManagerCommand from '@components/patterns/PackageManagerCommand/PackageManagerCommand.astro';
 
 <MiddlewareInfo
   version="2.1.1"
@@ -44,9 +45,15 @@ Ceci est un module [Node.js](https://nodejs.org/en/) disponible via
 [npm registry](https://www.npmjs.com/). L'installation se fait à l'aide de la commande
 [`npm install`](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
-```sh
-$ npm install cookie-session
-```
+<PackageManagerCommand command="npm install cookie-session" />
+
+<Alert type="Infos">
+
+`cookie-session` does not include its own TypeScript type definitions. If you use TypeScript, also install the community-maintained types from [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped) as a development dependency:
+
+<PackageManagerCommand command="npm install --save-dev @types/cookie-session" />
+
+</Alert>
 
 ## API
 
@@ -117,7 +124,7 @@ Les options peuvent également contenir l'un des éléments suivants (pour la li
 - `partitionné` : un booléen indiquant s'il faut partitionner le cookie dans Chrome pour la [mise à jour CHIPS](https://developers.google.com/privacy-sandbox/3pcd/chips) (`false` par défaut). Si cela est vrai, les cookies provenant de sites intégrés seront partitionnés et lisibles uniquement à partir du même site de premier niveau à partir duquel ils ont été créés.
 - `priority`: une chaîne indiquant la priorité des cookies. Cela peut être défini à `'low'`, `'medium`, ou `'high'`.
 - `sameSite`: un booléen ou une chaîne de caractères indiquant si le cookie est un cookie "même site" (`false` par défaut). Cela peut être défini à `'strict'`, `'lax'`, `'none'`, ou `true` (qui correspond à `'strict'`).
-- `secure`: un booléen indiquant si le cookie doit être envoyé uniquement via HTTPS (`false` par défaut pour HTTP, `true` par défaut pour HTTPS). Si cette valeur est définie à `true` et à Node. s n'est pas directement sur une connexion TLS, Assurez-vous de lire comment [configurer Express derrière des proxies] (https://expressjs.com/en/guide/behind-proxies.html) ou le cookie peut ne pas être configuré correctement.
+- `secure`: un booléen indiquant si le cookie doit être envoyé uniquement via HTTPS (`false` par défaut pour HTTP, `true` par défaut pour HTTPS). Si cette valeur est définie à `true` et à Node. s n'est pas directement sur une connexion TLS, Assurez-vous de lire comment [configurer Express derrière des proxies](/guide/behind-proxies) ou le cookie peut ne pas être configuré correctement.
 - `httpOnly`: un booléen indiquant si le cookie doit être envoyé uniquement via HTTP(S), et non disponible au client JavaScript (`true` par défaut).
 - `signed`: un booléen indiquant si le cookie doit être signé (`true` par défaut).
 - `écraser` : un booléen indiquant s'il faut écraser les cookies du même nom (`true` par défaut).

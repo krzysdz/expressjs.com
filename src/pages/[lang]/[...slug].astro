@@ -1,17 +1,17 @@
 ---
 import { getCollection } from 'astro:content';
 import DocLayout from '@layouts/DocLayout.astro';
-import { languages } from '@i18n/locales';
+import { languageCodes } from '@i18n/locales';
 import { render } from 'astro:content';
 import { getAdjacentPages } from '@utils/content';
 import { docsMenu } from '@/config/menu/docs';
 import { apiMenu } from '@/config/menu/api';
 import { resourcesMenu } from '@/config/menu/resources';
+import { DEFAULT_VERSION, VERSION_PREFIXES } from '@/config/versions';
+import LocalizedLink from '@components/patterns/LocalizedLink/LocalizedLink.astro';
 import type { LanguageCode } from '@i18n/locales';
 
 export async function getStaticPaths() {
-  const DEFAULT_VERSION = '5x';
-  const VERSION_PREFIXES = ['5x', '4x', '3x'];
   const DEFAULT_LANG = 'en';
 
   const pages = await getCollection('docs');
@@ -59,7 +59,7 @@ export async function getStaticPaths() {
     });
   });
 
-  for (const lang of Object.keys(languages)) {
+  for (const lang of languageCodes) {
     api.forEach((page) => {
       const slugParts = page.id.split('/');
       const version = slugParts[0];
@@ -74,7 +74,7 @@ export async function getStaticPaths() {
 
   const defaultVersionApiPages = api.filter((page) => page.id.startsWith(`${DEFAULT_VERSION}/`));
 
-  for (const lang of Object.keys(languages)) {
+  for (const lang of languageCodes) {
     defaultVersionApiPages.forEach((page) => {
       const [, ...restSlugParts] = page.id.split('/');
       const nonVersionedSlug = restSlugParts.join('/');
@@ -116,7 +116,7 @@ export async function getStaticPaths() {
     p.id.startsWith(`${DEFAULT_LANG}/`)
   );
 
-  for (const lang of Object.keys(languages)) {
+  for (const lang of languageCodes) {
     if (lang === DEFAULT_LANG) continue;
 
     englishDefaultVersionPages.forEach((page) => {
@@ -137,7 +137,7 @@ export async function getStaticPaths() {
   }
 
   // Fallback: Create paths for non-English languages using English pages content
-  for (const lang of Object.keys(languages)) {
+  for (const lang of languageCodes) {
     if (lang === DEFAULT_LANG) continue;
 
     const englishContentPages = contentPages.filter((p) => p.id.startsWith(`${DEFAULT_LANG}/`));
@@ -160,7 +160,7 @@ export async function getStaticPaths() {
   }
 
   // Fallback: Create paths for non-English languages using English docs content
-  for (const lang of Object.keys(languages)) {
+  for (const lang of languageCodes) {
     if (lang === DEFAULT_LANG) continue; // Skip English, already added
 
     const englishPages = pages.filter((p) => p.id.startsWith(`${DEFAULT_LANG}/`));
@@ -205,6 +205,18 @@ const { prev, next } = getAdjacentPages(
 const editUrl = isTranslation
   ? `https://github.com/expressjs/expressjs.com/blob/main/docs/i18n.md`
   : `https://github.com/expressjs/expressjs.com/edit/main/${page.filePath}`;
+
+// Shared collections (api/blog) are compiled once, so their in-content links are
+// baked to the default language. Re-localize them per render-language.
+const isSharedCollection = page.collection === 'api' || page.collection === 'blog';
+
+// Versioned content served at an unversioned URL is a copy of the default
+// version; its canonical is the versioned URL.
+const contentSlug = page.collection === 'api' ? page.id : page.id.split('/').slice(1).join('/');
+const isVersionedContent = VERSION_PREFIXES.some((v) => contentSlug.startsWith(`${v}/`));
+const servedUnversioned =
+  isVersionedContent && !VERSION_PREFIXES.some((v) => slug.startsWith(`${v}/`));
+const canonicalPathname = servedUnversioned ? `/${lang}/${contentSlug}/` : undefined;
 ---
 
 <DocLayout
@@ -215,6 +227,7 @@ const editUrl = isTranslation
   isTranslation={isTranslation}
   prev={prev}
   next={next}
+  canonicalPathname={canonicalPathname}
 >
-  <Content />
+  {isSharedCollection ? <Content components={{ a: LocalizedLink }} /> : <Content />}
 </DocLayout>

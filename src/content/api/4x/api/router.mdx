@@ -4,15 +4,17 @@ description: A router object is an isolated instance of middleware and routes in
 ---
 
 import Alert from '@components/primitives/Alert/Alert.astro';
+import Signature from '@components/patterns/Signature/Signature.astro';
+import Param from '@components/patterns/Signature/Param.astro';
 
 A `router` object is an instance of middleware and routes. You can think of it
 as a "mini-application," capable only of performing middleware and routing
 functions. Every Express application has a built-in app router.
 
 A router behaves like middleware itself, so you can use it as an argument to
-[app.use()](/en/4x/api/application#appusepath-callback--callback) or as the argument to another router's [use()](#routerusepath-function--function) method.
+[app.use()](/api/application#appuse) or as the argument to another router's [use()](#routeruse) method.
 
-The top-level `express` object has a [Router()](/en/4x/api/express#expressrouteroptions) method that creates a new `router` object.
+The top-level `express` object has a [Router()](/api/express#expressrouter) method that creates a new `router` object.
 
 Once you've created a router object, you can add middleware and HTTP method routes (such as `get`, `put`, `post`,
 and so on) to it just like an application. For example:
@@ -31,6 +33,22 @@ router.get('/events', function (req, res, next) {
 });
 ```
 
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+// invoked for any requests passed to this router
+router.use(function (req: Request, res: Response, next: NextFunction) {
+  // .. some logic here .. like any other middleware
+  next();
+});
+
+// will handle any request that ends in /events
+// depends on where the router is "use()'d"
+router.get('/events', function (req: Request, res: Response, next: NextFunction) {
+  // ..
+});
+```
+
 You can then use a router for a particular root URL in this way separating your routes into files or even mini-apps.
 
 ```js
@@ -40,9 +58,82 @@ app.use('/calendar', router);
 
 ## Methods
 
-### Router([options])
+### Router()
 
-### router.all(path, [callback, ...] callback)
+<Signature returns="Router">
+  <Fragment slot="attributes">
+    <Param name="options" type="Object" optional>
+      Options that configure the router's behavior.
+
+      <Fragment slot="properties">
+        <Param name="caseSensitive" type="Boolean" default="false">
+          Enable case sensitivity. Disabled by default, treating `/Foo` and `/foo` as the same.
+        </Param>
+        <Param name="mergeParams" type="Boolean" default="false">
+          Preserve the `req.params` values from the parent router. If the parent and the child have conflicting param names, the child's value takes precedence.
+        </Param>
+        <Param name="strict" type="Boolean" default="false">
+          Enable strict routing. Disabled by default, `/foo` and `/foo/` are treated the same by the router.
+        </Param>
+      </Fragment>
+    </Param>
+
+  </Fragment>
+</Signature>
+
+Creates a new router object.
+
+```cjs title="index.cjs" ins={2}
+var express = require('express');
+var router = express.Router({ caseSensitive: true, strict: true });
+
+router.get('/events', function (req, res) {
+  res.send('events');
+});
+
+// mount the router on an app
+app.use('/calendar', router);
+```
+
+```mjs title="index.mjs" ins={3}
+import express from 'express';
+
+const router = express.Router({ caseSensitive: true, strict: true });
+
+router.get('/events', (req, res) => {
+  res.send('events');
+});
+
+// mount the router on an app
+app.use('/calendar', router);
+```
+
+```ts title="index.ts"
+import express, { type Request, type Response } from 'express';
+
+const router = express.Router({ caseSensitive: true, strict: true });
+
+router.get('/events', (req: Request, res: Response) => {
+  res.send('events');
+});
+
+// mount the router on an app
+app.use('/calendar', router);
+```
+
+### router.all()
+
+<Signature returns="Router">
+  <Fragment slot="attributes">
+    <Param name="path" type="String | RegExp | Array">
+      The path for which the route callbacks are invoked.
+    </Param>
+    <Param name="callback" type="Function | Function[]">
+      One or more middleware/handler functions. Each may call `next('route')` to skip the remaining
+      callbacks.
+    </Param>
+  </Fragment>
+</Signature>
 
 This method is just like the `router.METHOD()` methods, except that it matches all HTTP methods (verbs).
 
@@ -74,7 +165,19 @@ the example is much like before, but it only restricts paths prefixed with
 router.all('/api/*', requireAuthentication);
 ```
 
-### router.METHOD(path, [callback, ...] callback)
+### router.METHOD()
+
+<Signature returns="Router">
+  <Fragment slot="attributes">
+    <Param name="path" type="String | RegExp | Array">
+      The path for which the route callbacks are invoked.
+    </Param>
+    <Param name="callback" type="Function | Function[]">
+      One or more middleware/handler functions. Each may call `next('route')` to skip the remaining
+      callbacks.
+    </Param>
+  </Fragment>
+</Signature>
 
 The `router.METHOD()` methods provide the routing functionality in Express,
 where METHOD is one of the HTTP methods, such as GET, PUT, POST, and so on,
@@ -85,6 +188,12 @@ in lowercase. Thus, the actual methods are `router.get()`, `router.post()`,
 
 The `router.get()` function is automatically called for the HTTP `HEAD` method in addition to the
 `GET` method if `router.head()` was not called for the path before `router.get()`.
+
+</Alert>
+
+<Alert type="info">
+
+`router.query()` routes HTTP `QUERY` requests, mirroring [`app.query()`](/api/application/#appquery). The `QUERY` method is gated by the runtime and requires Node.js `>=20.19.3 <21 || >=22.2.0`.
 
 </Alert>
 
@@ -106,6 +215,14 @@ router.get('/', function (req, res) {
 });
 ```
 
+```ts
+import { type Request, type Response } from 'express';
+
+router.get('/', function (req: Request, res: Response) {
+  res.send('hello world');
+});
+```
+
 You can also use regular expressions&mdash;useful if you have very specific
 constraints, for example the following would match "GET /commits/71dbb9c" as well
 as "GET /commits/71dbb9c..4c084f9".
@@ -118,7 +235,29 @@ router.get(/^\/commits\/(\w+)(?:\.\.(\w+))?$/, function (req, res) {
 });
 ```
 
-### router.param(name, callback)
+```ts
+import { type Request, type Response } from 'express';
+
+router.get(/^\/commits\/(\w+)(?:\.\.(\w+))?$/, function (req: Request, res: Response) {
+  const from = req.params[0];
+  const to = req.params[1] || 'HEAD';
+  res.send('commit range ' + from + '..' + to);
+});
+```
+
+### router.param()
+
+<Signature returns="Router">
+  <Fragment slot="attributes">
+    <Param name="name" type="String">
+      The name of the route parameter to attach the trigger to. Unlike `app.param()`, this does not
+      accept an array.
+    </Param>
+    <Param name="callback" type="Function">
+      The trigger called as `callback(req, res, next, value, name)`.
+    </Param>
+  </Fragment>
+</Signature>
 
 Adds callback triggers to route parameters, where `name` is the name of the parameter and `callback` is the callback function. Although `name` is technically optional, using this method without it is deprecated starting with Express v4.11.0 (see below).
 
@@ -154,6 +293,24 @@ router.param('user', function (req, res, next, id) {
 });
 ```
 
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+router.param('user', function (req: Request, res: Response, next: NextFunction, id) {
+  // try to get the user details from the User model and attach it to the request object
+  User.find(id, function (err, user) {
+    if (err) {
+      next(err);
+    } else if (user) {
+      req.user = user;
+      next();
+    } else {
+      next(new Error('failed to load user'));
+    }
+  });
+});
+```
+
 Param callback functions are local to the router on which they are defined. They are not inherited by mounted apps or routers, nor are they triggered for route parameters inherited from parent routers. Hence, param callbacks defined on `router` will be triggered only by route parameters defined on `router` routes.
 
 A param callback will be called only once in a request-response cycle, even if the parameter is matched in multiple routes, as shown in the following examples.
@@ -175,6 +332,25 @@ router.get('/user/:id', function (req, res) {
 });
 ```
 
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+router.param('id', function (req: Request, res: Response, next: NextFunction, id) {
+  console.log('CALLED ONLY ONCE');
+  next();
+});
+
+router.get('/user/:id', function (req: Request, res: Response, next: NextFunction) {
+  console.log('although this matches');
+  next();
+});
+
+router.get('/user/:id', function (req: Request, res: Response) {
+  console.log('and this matches too');
+  res.end();
+});
+```
+
 On `GET /user/42`, the following is printed:
 
 ```
@@ -183,7 +359,7 @@ although this matches
 and this matches too
 ```
 
-<Alert type="warning">
+<Alert type="alert">
 
 The following section describes `router.param(callback)`, which is deprecated as of v4.11.0.
 
@@ -197,7 +373,7 @@ The middleware returned by the function decides the behavior of what happens whe
 
 In this example, the `router.param(name, callback)` signature is modified to `router.param(name, accessId)`. Instead of accepting a name and a callback, `router.param()` will now accept a name and a number.
 
-```js
+```cjs title="index.cjs"
 var express = require('express');
 var app = express();
 var router = express.Router();
@@ -228,6 +404,70 @@ app.listen(3000, function () {
 });
 ```
 
+```mjs title="index.mjs"
+import express from 'express';
+
+const app = express();
+const router = express.Router();
+
+// customizing the behavior of router.param()
+router.param(function (param, option) {
+  return function (req, res, next, val) {
+    if (val === option) {
+      next();
+    } else {
+      res.sendStatus(403);
+    }
+  };
+});
+
+// using the customized router.param()
+router.param('id', '1337');
+
+// route to trigger the capture
+router.get('/user/:id', function (req, res) {
+  res.send('OK');
+});
+
+app.use(router);
+
+app.listen(3000, function () {
+  console.log('Ready');
+});
+```
+
+```ts title="index.ts"
+import express, { type Express, type Request, type Response, type NextFunction } from 'express';
+
+const app: Express = express();
+const router = express.Router();
+
+// customizing the behavior of router.param()
+router.param(function (param, option) {
+  return function (req: Request, res: Response, next: NextFunction, val) {
+    if (val === option) {
+      next();
+    } else {
+      res.sendStatus(403);
+    }
+  };
+});
+
+// using the customized router.param()
+router.param('id', '1337');
+
+// route to trigger the capture
+router.get('/user/:id', function (req: Request, res: Response) {
+  res.send('OK');
+});
+
+app.use(router);
+
+app.listen(3000, function () {
+  console.log('Ready');
+});
+```
+
 In this example, the `router.param(name, callback)` signature remains the same, but instead of a middleware callback, a custom data type checking function has been defined to validate the data type of the user id.
 
 ```js
@@ -246,7 +486,33 @@ router.param('id', function (candidate) {
 });
 ```
 
-### router.route(path)
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+router.param(function (param, validator) {
+  return function (req: Request, res: Response, next: NextFunction, val) {
+    if (validator(val)) {
+      next();
+    } else {
+      res.sendStatus(403);
+    }
+  };
+});
+
+router.param('id', function (candidate) {
+  return !isNaN(parseFloat(candidate)) && isFinite(candidate);
+});
+```
+
+### router.route()
+
+<Signature returns="Route">
+  <Fragment slot="attributes">
+    <Param name="path" type="String">
+      The path of the route to create.
+    </Param>
+  </Fragment>
+</Signature>
 
 Returns an instance of a single route which you can then use to handle HTTP verbs
 with optional middleware. Use `router.route()` to avoid duplicate route naming and
@@ -291,6 +557,44 @@ router
   });
 ```
 
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+const router = express.Router();
+
+router.param('user_id', function (req: Request, res: Response, next: NextFunction, id) {
+  // sample user, would actually fetch from DB, etc...
+  req.user = {
+    id: id,
+    name: 'TJ',
+  };
+  next();
+});
+
+router
+  .route('/users/:user_id')
+  .all(function (req: Request, res: Response, next: NextFunction) {
+    // runs for all HTTP verbs first
+    // think of it as route specific middleware!
+    next();
+  })
+  .get(function (req: Request, res: Response, next: NextFunction) {
+    res.json(req.user);
+  })
+  .put(function (req: Request, res: Response, next: NextFunction) {
+    // just an example of maybe updating the user
+    req.user.name = req.params.name;
+    // save user ... etc
+    res.json(req.user);
+  })
+  .post(function (req: Request, res: Response, next: NextFunction) {
+    next(new Error('not implemented'));
+  })
+  .delete(function (req: Request, res: Response, next: NextFunction) {
+    next(new Error('not implemented'));
+  });
+```
+
 This approach re-uses the single `/users/:user_id` path and adds handlers for
 various HTTP methods.
 
@@ -302,17 +606,28 @@ belong to the route to which they were added.
 
 </Alert>
 
-### router.use([path], [function, ...] function)
+### router.use()
+
+<Signature returns="Router">
+  <Fragment slot="attributes">
+    <Param name="path" type="String | RegExp | Array" optional>
+      The mount path for the middleware. Defaults to `/`.
+    </Param>
+    <Param name="callback" type="Function | Function[]">
+      One or more middleware functions to mount.
+    </Param>
+  </Fragment>
+</Signature>
 
 Uses the specified middleware function or functions, with optional mount path `path`, that defaults to "/".
 
-This method is similar to [app.use()](/en/4x/api/application#appusepath-callback--callback). A simple example and use case is described below.
-See [app.use()](/en/4x/api/application#appusepath-callback--callback) for more information.
+This method is similar to [app.use()](/api/application#appuse). A simple example and use case is described below.
+See [app.use()](/api/application#appuse) for more information.
 
 Middleware is like a plumbing pipe: requests start at the first middleware function defined
 and work their way "down" the middleware stack processing for each path they match.
 
-```js
+```cjs title="index.cjs"
 var express = require('express');
 var app = express();
 var router = express.Router();
@@ -340,6 +655,64 @@ app.use('/foo', router);
 app.listen(3000);
 ```
 
+```mjs title="index.mjs"
+import express from 'express';
+
+const app = express();
+const router = express.Router();
+
+// simple logger for this router's requests
+// all requests to this router will first hit this middleware
+router.use(function (req, res, next) {
+  console.log('%s %s %s', req.method, req.url, req.path);
+  next();
+});
+
+// this will only be invoked if the path starts with /bar from the mount point
+router.use('/bar', function (req, res, next) {
+  // ... maybe some additional /bar logging ...
+  next();
+});
+
+// always invoked
+router.use(function (req, res, next) {
+  res.send('Hello World');
+});
+
+app.use('/foo', router);
+
+app.listen(3000);
+```
+
+```ts title="index.ts"
+import express, { type Express, type Request, type Response, type NextFunction } from 'express';
+
+const app: Express = express();
+const router = express.Router();
+
+// simple logger for this router's requests
+// all requests to this router will first hit this middleware
+router.use(function (req: Request, res: Response, next: NextFunction) {
+  console.log('%s %s %s', req.method, req.url, req.path);
+  next();
+});
+
+// this will only be invoked if the path starts with /bar from the mount point
+router.use('/bar', function (req: Request, res: Response, next: NextFunction) {
+  // ... maybe some additional /bar logging ...
+  next();
+});
+
+// always invoked
+router.use(function (req: Request, res: Response, next: NextFunction) {
+  res.send('Hello World');
+});
+
+app.use('/foo', router);
+
+app.listen(3000);
+```
+
 The "mount" path is stripped and is _not_ visible to the middleware function.
 The main effect of this feature is that a mounted middleware function may operate without
 code changes regardless of its "prefix" pathname.
@@ -348,13 +721,36 @@ The order in which you define middleware with `router.use()` is very important.
 They are invoked sequentially, thus the order defines middleware precedence. For example,
 usually a logger is the very first middleware you would use, so that every request gets logged.
 
-```js
+```cjs title="index.cjs"
 var logger = require('morgan');
 var path = require('path');
 
 router.use(logger());
 router.use(express.static(path.join(__dirname, 'public')));
 router.use(function (req, res) {
+  res.send('Hello');
+});
+```
+
+```mjs title="index.mjs"
+import logger from 'morgan';
+import path from 'path';
+
+router.use(logger());
+router.use(express.static(path.join(__dirname, 'public')));
+router.use(function (req, res) {
+  res.send('Hello');
+});
+```
+
+```ts title="index.ts"
+import logger from 'morgan';
+import path from 'path';
+import { type Request, type Response } from 'express';
+
+router.use(logger());
+router.use(express.static(path.join(__dirname, 'public')));
+router.use(function (req: Request, res: Response) {
   res.send('Hello');
 });
 ```
@@ -371,6 +767,16 @@ router.use(function (req, res) {
 });
 ```
 
+```ts
+import { type Request, type Response } from 'express';
+
+router.use(express.static(path.join(__dirname, 'public')));
+router.use(logger());
+router.use(function (req: Request, res: Response) {
+  res.send('Hello');
+});
+```
+
 Another example is serving files from multiple directories,
 giving precedence to "./public" over the others:
 
@@ -383,10 +789,16 @@ router.use(express.static(path.join(__dirname, 'uploads')));
 The `router.use()` method also supports named parameters so that your mount points
 for other routers can benefit from preloading using named parameters.
 
-**NOTE**: Although these middleware functions are added via a particular router, _when_
+<Alert type="info">
+
+Although these middleware functions are added via a particular router, _when_
 they run is defined by the path they are attached to (not the router). Therefore,
 middleware added via one router may run for other routers if its routes
-match. For example, this code shows two different routers mounted on the same path:
+match.
+
+</Alert>
+
+For example, this code shows two different routers mounted on the same path:
 
 ```js
 var authRouter = express.Router();
@@ -401,6 +813,29 @@ openRouter.get('/', function (req, res, next) {
   // ... List users ...
 });
 openRouter.get('/:user_id', function (req, res, next) {
+  // ... View user ...
+});
+
+app.use('/users', authRouter);
+app.use('/users', openRouter);
+```
+
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+import { basic } from './authenticate';
+
+const authRouter = express.Router();
+const openRouter = express.Router();
+
+authRouter.use(basic(usersdb));
+
+authRouter.get('/:user_id/edit', function (req: Request, res: Response, next: NextFunction) {
+  // ... Edit user UI ...
+});
+openRouter.get('/', function (req: Request, res: Response, next: NextFunction) {
+  // ... List users ...
+});
+openRouter.get('/:user_id', function (req: Request, res: Response, next: NextFunction) {
   // ... View user ...
 });
 

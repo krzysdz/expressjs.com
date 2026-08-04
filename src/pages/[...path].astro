@@ -1,0 +1,115 @@
+---
+// English redirects for every content collection.
+//
+// The site serves all content under `/[lang]/…`, so a bare path with no locale
+// prefix (an old inbound link, or what's left after Cloudflare strips `.html`)
+// has no page of its own. This catch-all enumerates the same collections the
+// real routes use via `getCollection`, so the slugs always match the generated
+// pages, and redirects each one to its `/en/` home.
+//
+// The redirect HTML is rendered by hand (rather than `Astro.redirect`) so the
+// meta refresh fires instantly (`0;`) — Astro's static `Astro.redirect` helper
+// hardcodes a 2-second delay, which is a poor redirect experience.
+import { getCollection } from 'astro:content';
+import { DEFAULT_VERSION } from '@config/versions';
+import { REMOVED_LOCALES, movedPages } from '@/config/redirects/moved-content';
+import { languageCodes } from '@i18n/locales';
+
+export async function getStaticPaths() {
+  const [docs, pages, api, blog] = await Promise.all([
+    getCollection('docs'),
+    getCollection('pages'),
+    getCollection('api'),
+    getCollection('blog'),
+  ]);
+
+  const slugs = new Set<string>();
+
+  const add = (slug: string) => {
+    if (!slug) return;
+    slugs.add(slug);
+    // Pages served at the default version are also available unversioned,
+    // e.g. `5x/starter/installing` → `starter/installing`.
+    if (slug.startsWith(`${DEFAULT_VERSION}/`)) {
+      slugs.add(slug.slice(DEFAULT_VERSION.length + 1));
+    }
+  };
+
+  // `docs` (versioned guides/starter/…) and `pages` (resources, support, …)
+  // both embed the language as the first id segment; only English is canonical.
+  for (const entry of [...docs, ...pages]) {
+    const [lang, ...rest] = entry.id.split('/');
+    if (lang !== 'en') continue;
+    add(rest.join('/'));
+  }
+
+  // `api` is a shared collection with `<version>/<rest>` ids and no language.
+  for (const entry of api) {
+    add(entry.id);
+  }
+
+  // `blog` is served under `/[lang]/blog/<slug>`.
+  for (const entry of blog) {
+    slugs.add(`blog/${entry.id}`);
+  }
+  slugs.add('blog');
+
+  // Removed locales redirect to the English page (`/<locale>/<slug>` → `/en/<slug>`,
+  // and the bare `/<locale>` → `/en/`). Iterate a snapshot so the loop doesn't visit
+  // the paths it adds.
+  for (const slug of [...slugs]) {
+    for (const locale of REMOVED_LOCALES) {
+      slugs.add(`${locale}/${slug}`);
+    }
+  }
+  for (const locale of REMOVED_LOCALES) {
+    slugs.add(locale);
+  }
+
+  // Moved pages 404 in every locale form, so enumerate each one (bare, and under
+  // every current and removed locale) to redirect it.
+  for (const path of Object.keys(movedPages)) {
+    slugs.add(path.slice(1));
+    for (const locale of [...languageCodes, ...REMOVED_LOCALES]) {
+      slugs.add(`${locale}${path}`);
+    }
+  }
+
+  return [...slugs].map((path) => ({ params: { path } }));
+}
+
+// Strip any leading locale (current or removed) to get the unlocalized slug. A moved
+// page goes to its configured fallback, keeping the reader's locale for internal
+// targets; every other path goes to its English page.
+const rawPath = String(Astro.params.path);
+const firstSegment = rawPath.split('/')[0];
+const isCurrentLocale = languageCodes.includes(firstSegment);
+const hasLocale = isCurrentLocale || REMOVED_LOCALES.includes(firstSegment);
+const locale = isCurrentLocale ? firstSegment : 'en';
+const slug = hasLocale ? rawPath.slice(firstSegment.length + 1) : rawPath;
+
+const fallback = movedPages[`/${slug}`];
+let target;
+if (fallback) {
+  target = fallback.startsWith('http') ? fallback : `/${locale}${fallback}`;
+} else {
+  target = `/en/${slug}`;
+}
+// The English homepage is canonically served at `/`, not `/en/`.
+if (target === '/en/') target = '/';
+const canonical = new URL(target, Astro.site).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting to {target}</title>
+    <meta http-equiv="refresh" content={`0;url=${target}`} />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={canonical} />
+  </head>
+  <body>
+    <a href={target}>Redirecting to <code>{target}</code></a>
+  </body>
+</html>

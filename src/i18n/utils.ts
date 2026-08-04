@@ -1,4 +1,4 @@
-import { ui, defaultLang, languages } from './locales';
+import { ui, defaultLang, languageCodes } from './locales';
 
 export function getLangFromUrl(url: URL) {
   const strippedPathname = url.pathname.replace(/\.html$/, '');
@@ -24,17 +24,17 @@ export function useTranslations(lang: keyof typeof ui) {
   };
 }
 /**
- * Get all supported language codes
+ * Homepage path for a language. English is served at the root.
  */
-export function getLanguageCodes(): string[] {
-  return Object.keys(languages);
+export function getHomePath(lang: string): string {
+  return lang === defaultLang ? '/' : `/${lang}/`;
 }
 
 /**
  * Create a regex pattern to match language prefixes in URLs
  */
 export function createLanguagePathRegex(): RegExp {
-  const codes = getLanguageCodes().join('|');
+  const codes = languageCodes.join('|');
   return new RegExp(`^/(${codes})(?:/|$)`);
 }
 

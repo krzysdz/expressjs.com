@@ -7,7 +7,7 @@ import Alert from '@components/primitives/Alert/Alert.astro';
 
 ## aplicativo
 
-Em geral, um ou mais programas que são projetados para realizar operações para uma finalidade específica. No contexto da Express, um programa que usa o API Express executando na plataforma Node.js. Também pode se referir a um [objeto do aplicativo](/en/api#express).
+Em geral, um ou mais programas que são projetados para realizar operações para uma finalidade específica. No contexto da Express, um programa que usa o API Express executando na plataforma Node.js. Também pode se referir a um [objeto do aplicativo](/api#express).
 
 ## API
 
@@ -27,7 +27,7 @@ Uma função que é invocada pela camada de roteamento Express antes do manipula
 
 - `var foo = require('middleware')` é chamado de _requiring_ ou _usando_ um módulo Node.js. Então, a instrução `var mw = foo()` normalmente retorna o middleware.
 - `app.use(mw)` é chamado de _adicionando o middleware à pilha de processamento global_.
-- `app.get('/foo', mw, função (req, res) { ... })` é chamado de _adicionando o middleware para a pilha de processamento "GET /foo"_.
+- `app.get('/foo', mw, (req, res) => { /* ... */ })` is called _adding the middleware to the "GET /foo" processing stack_.
 
 ## Node.js
 
@@ -58,4 +58,4 @@ Parte de uma URL que identifica um recurso. Por exemplo, em `http://foo.com/prod
 
 ## roteador
 
-Ver [router](/en/api#router) na referência da API.
+Ver [router](/api#router) na referência da API.

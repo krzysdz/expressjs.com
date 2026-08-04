@@ -1,41 +1,43 @@
 ---
-title: Middleware expresso
-description: Explore uma lista de módulos de middleware Express.js mantidos pela equipe Express e pela comunidade, incluindo módulos de intermediários e de terceiros populares.
+title: Express middleware
+description: Explore a list of Express.js middleware modules maintained by the Express team and the community, including built-in middleware and popular third-party modules.
 ---
 
-Os módulos Express middleware listados aqui são mantidos pela
-[equipe de Expressjs](https://github.com/orgs/expressjs/people).
+import Alert from '@components/primitives/Alert/Alert.astro';
 
-| Módulo de Middleware                                        | Descrição:                                                                                                    |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| [body-parser](/en/resources/middleware/body-parser)         | Analisar corpo da requisição HTTP.                                                                            |
-| [compression](/en/resources/middleware/compression)         | Comprimir respostas HTTP.                                                                                     |
-| [cookie-parser](/en/resources/middleware/cookie-parser)     | Analise o cabeçalho de cookie e preencha `req.cookies`. Ver também [cookies](https://github.com/jed/cookies). |
-| [cookie-session](/en/resources/middleware/cookie-session)   | Estabelecer sessões baseadas em cookies.                                                                      |
-| [cors](/en/resources/middleware/cors)                       | Ativa o compartilhamento de recursos entre origens (CORS) com várias opções.                                  |
-| [errorhandler](/en/resources/middleware/errorhandler)       | Processamento/depuração do desenvolvimento.                                                                   |
-| [method-override](/en/resources/middleware/method-override) | Substituir métodos HTTP utilizando cabeçalho.                                                                 |
-| [morgan](/en/resources/middleware/morgan)                   | Log do pedido HTTP.                                                                                           |
-| [multer](/en/resources/middleware/multer)                   | Manipular dados de formulários de várias partes.                                                              |
-| [response-time](/en/resources/middleware/response-time)     | Registrar tempo de resposta HTTP.                                                                             |
-| [serve-favicon](/en/resources/middleware/serve-favicon)     | Sirva um favicon.                                                                                             |
-| [serve-index](/en/resources/middleware/serve-index)         | Serve a lista de diretório para um determinado caminho.                                                       |
-| [serve-static](/en/resources/middleware/serve-static)       | Servir arquivos estáticos.                                                                                    |
-| [session](/en/resources/middleware/session)                 | Estabelecer sessões baseadas no servidor (apenas desenvolvimento).                                            |
-| [timeout](/en/resources/middleware/timeout)                 | Definir tempo limite de processamento de requisição periodicamente.                                           |
-| [vhost](/en/resources/middleware/vhost)                     | Criar domínios virtuais.                                                                                      |
+The Express middleware modules listed here are maintained by the
+[Expressjs team](https://github.com/orgs/expressjs/people).
 
-## Módulos adicionais de middleware
+| Middleware module                                        | Descrição:                                                                                          |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| [body-parser](/resources/middleware/body-parser)         | Parse HTTP request body.                                                                            |
+| [compression](/resources/middleware/compression)         | Compress HTTP responses.                                                                            |
+| [cookie-parser](/resources/middleware/cookie-parser)     | Parse cookie header and populate `req.cookies`. See also [cookies](https://github.com/jed/cookies). |
+| [cookie-session](/resources/middleware/cookie-session)   | Establish cookie-based sessions.                                                                    |
+| [cors](/resources/middleware/cors)                       | Enable cross-origin resource sharing (CORS) with various options.                                   |
+| [errorhandler](/resources/middleware/errorhandler)       | Development error-handling/debugging.                                                               |
+| [method-override](/resources/middleware/method-override) | Override HTTP methods using header.                                                                 |
+| [morgan](/resources/middleware/morgan)                   | HTTP request logger.                                                                                |
+| [multer](/resources/middleware/multer)                   | Handle multi-part form data.                                                                        |
+| [response-time](/resources/middleware/response-time)     | Record HTTP response time.                                                                          |
+| [serve-favicon](/resources/middleware/serve-favicon)     | Serve a favicon.                                                                                    |
+| [serve-index](/resources/middleware/serve-index)         | Serve directory listing for a given path.                                                           |
+| [serve-static](/resources/middleware/serve-static)       | Serve static files.                                                                                 |
+| [session](/resources/middleware/session)                 | Establish server-based sessions (development only).                                                 |
+| [timeout](/resources/middleware/timeout)                 | Set a timeout period for HTTP request processing.                                                   |
+| [vhost](/resources/middleware/vhost)                     | Create virtual domains.                                                                             |
 
-Estes são alguns módulos de middleware mais populares.
+## Additional middleware modules
 
-<Alert type="warning">
-  Esta informação refere-se a sites de terceiros, produtos ou módulos que não são mantidos pela equipe
-  Expressjs. Listar aqui não constitui um endosso ou recomendação da equipe de projeto
+These are some additional popular middleware modules.
+
+<Alert type="advertência">
+  Esta informação refere-se a sites de terceiros, produtos ou módulos que não são mantidos pela
+  equipe Expressjs. Listar aqui não constitui um endosso ou recomendação da equipe de projeto
   Expressjs.
 </Alert>
 
-| Módulo de Middleware                                | Descrição:                                                                                                                                        |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [helmet](https://github.com/helmetjs/helmet)        | Ajuda a proteger seus aplicativos, definindo vários cabeçalhos HTTP.                                                                              |
-| [passport](https://github.com/jaredhanson/passport) | Autenticação usando "estratégias" como OAuth, OpenID e muitas outras. Veja [passportjs.org](https://passportjs.org/) para obter mais informações. |
+| Middleware module                                   | Descrição:                                                                                                                                   |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| [helmet](https://github.com/helmetjs/helmet)        | Helps secure your apps by setting various HTTP headers.                                                                                      |
+| [passport](https://github.com/jaredhanson/passport) | Authentication using "strategies" such as OAuth, OpenID and many others. See [passportjs.org](https://passportjs.org/) for more information. |

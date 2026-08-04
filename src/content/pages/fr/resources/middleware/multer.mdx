@@ -5,9 +5,10 @@ description: Middleware pour gérer les multi-pièces/form-données
 
 import MiddlewareInfo from '@components/patterns/MiddlewareInfo/MiddlewareInfo.astro';
 import Alert from '@components/primitives/Alert/Alert.astro';
+import PackageManagerCommand from '@components/patterns/PackageManagerCommand/PackageManagerCommand.astro';
 
 <MiddlewareInfo
-  version="2.1.1"
+  version="2.2.0"
   github="https://github.com/expressjs/multer"
   npm="https://www.npmjs.com/package/multer"
 />
@@ -36,9 +37,15 @@ Ce README est également disponible dans d'autres langues :
 
 ## Installation
 
-```sh
-$ npm install multer
-```
+<PackageManagerCommand command="npm install multer" />
+
+<Alert type="Infos">
+
+`multer` does not include its own TypeScript type definitions. If you use TypeScript, also install the community-maintained types from [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped) as a development dependency:
+
+<PackageManagerCommand command="npm install --save-dev @types/multer" />
+
+</Alert>
 
 ## Usage
 
@@ -280,19 +287,20 @@ memory storage is used.
 
 ### `limites`
 
-Un objet spécifiant les limites de taille des propriétés optionnelles suivantes. Multer passe cet objet directement dans busboy, et les détails des propriétés peuvent être trouvés sur la page [busboy's page] (https://github.com/mscdex/busboy#busboy-methods).
+Un objet spécifiant les limites de taille des propriétés optionnelles suivantes. Multer passe cet objet directement dans busboy, et les détails des propriétés peuvent être trouvés sur la page [busboy's page](https://github.com/mscdex/busboy#busboy-methods).
 
 Les valeurs entières suivantes sont disponibles :
 
-| Clés            | Libellé                                                                               | Par défaut |
-| --------------- | ------------------------------------------------------------------------------------- | ---------- |
-| `fieldNameSize` | Taille maximale du nom du champ                                                       | 100 octets |
-| `fieldSize`     | Taille maximale du champ (en octets)                                                  | 1 Mo       |
-| `champs`        | Nombre maximum de champs hors fichier                                                 | Infini     |
-| `fileSize`      | Pour les formes multiparties, la taille maximale du fichier (en octets)               | Infini     |
-| `fichiers`      | Pour les formulaires en plusieurs parties, le nombre maximum de champs de fichier     | Infini     |
-| `Parties`       | Pour les formes multiparties, le nombre maximum de parties (champs + fichiers)        | Infini     |
-| `headerPairs`   | Pour les formes multiparties, le nombre maximum de clés d'en-tête =>valeur à analyser | 2000       |
+| Clés                | Libellé                                                                               | Par défaut |
+| ------------------- | ------------------------------------------------------------------------------------- | ---------- |
+| `fieldNameSize`     | Taille maximale du nom du champ                                                       | 100 octets |
+| `fieldSize`         | Taille maximale du champ (en octets)                                                  | 1 Mo       |
+| `champs`            | Nombre maximum de champs hors fichier                                                 | Infini     |
+| `fileSize`          | Pour les formes multiparties, la taille maximale du fichier (en octets)               | Infini     |
+| `fichiers`          | Pour les formulaires en plusieurs parties, le nombre maximum de champs de fichier     | Infini     |
+| `Parties`           | Pour les formes multiparties, le nombre maximum de parties (champs + fichiers)        | Infini     |
+| `headerPairs`       | Pour les formes multiparties, le nombre maximum de clés d'en-tête =>valeur à analyser | 2000       |
+| `fieldNestingDepth` | Max number of nesting levels for field names (e.g. `a[b][c]` has 2 levels)            | Infini     |
 
 Spécifier les limites peut aider à protéger votre site contre les attaques par déni de service (DoS).
 
@@ -317,10 +325,19 @@ function fileFilter(req, file, cb) {
 }
 ```
 
+## Security
+
+Specifying the [limits](#limits) can help protect your site against denial of service (DoS) attacks. The following limits are recommended for most applications:
+
+- `fileSize` -- set to the maximum expected file size for your use case
+- `files` -- set to the maximum number of files per request
+- `fields` -- set to the maximum number of text fields per request
+- `fieldNestingDepth` -- set to the minimum depth your field names require (e.g. `3` for `a[b][c]`)
+
 ## Gestion des erreurs
 
 En cas d'erreur, Multer délègue l'erreur à Express. Vous pouvez
-afficher une belle page d'erreur en utilisant [le type express way](http://expressjs.com/guide/error-handling.html).
+afficher une belle page d'erreur en utilisant [le type express way](/guide/error-handling).
 
 Si vous voulez attraper des erreurs spécifiques à Multer, vous pouvez appeler la fonction
 middleware par vous-même. Aussi, si vous voulez attraper seulement [les erreurs Multer](https://github.com/expressjs/multer/blob/main/lib/multer-error.js), vous pouvez utiliser la classe `MulterError` qui est attachée à l'objet `multer` lui-même (e. . `err instanceof multer.MulterError`).

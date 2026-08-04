@@ -4,13 +4,27 @@ import { fileURLToPath, URL } from 'node:url';
 import matter from 'gray-matter';
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { toString } from 'mdast-util-to-string';
+import { signatureMetaToText } from '../src/utils/signature-meta.mjs';
 
 const CONTENT_DIR = fileURLToPath(new URL('../src/content', import.meta.url));
 
 const stripMdxImports = (content) => content.replace(/^import\s+.*$/gm, '');
 
+// Strip HTML/JSX tags, then drop any leftover `<` that could still start a tag
+// (e.g. the one `<<a>script>` reconstructs). After the second pass no `<` precedes
+// a letter, so no tag-like content survives, while comparison text such as
+// `<21 || >=22` is preserved.
+const stripTags = (text) =>
+  text.replace(/<\/?[A-Za-z][^>]*>/g, '').replace(/<(?=\/?[A-Za-z])/g, '');
+
 const mdToText = (content) =>
-  toString(fromMarkdown(stripMdxImports(content))).replace(/<[^>]*>/g, '');
+  stripTags(toString(fromMarkdown(signatureMetaToText(stripMdxImports(content)))));
+
+// Build the public path segment from a content-relative file path: drop the
+// extension and any trailing `index` so `foo/index.mdx` -> `foo`. This matches
+// Astro's glob loader, which serves index files at their directory URL (without
+// a trailing `/index`).
+const toPathSegment = (relPath) => relPath.replace(/\.mdx?$/, '').replace(/(?:^|\/)index$/, '');
 
 const collectMdFiles = async (dir, base = dir) => {
   const entries = await readdir(dir);
@@ -35,14 +49,14 @@ export const getPages = async (lang) => {
       const fullPath = join(baseDir, file);
       const raw = await readFile(fullPath, 'utf-8');
       const { data, content } = matter(raw);
-      const pathSegment = relative(baseDir, fullPath).replace(/\.mdx?$/, '');
+      const pathSegment = toPathSegment(relative(baseDir, fullPath));
       const isResource = pathSegment.startsWith('resources');
 
       return {
         title: data.title ?? basename(file).replace(/\.mdx?$/, ''),
         description: data.description ?? '',
         content: mdToText(content),
-        path: `/${lang}/${pathSegment}`,
+        path: `/${lang}/${pathSegment}`.replace(/\/+$/, ''),
         category: isResource ? 'menu.main.resources' : 'menu.main.docs',
       };
     })
@@ -58,13 +72,13 @@ export const getDocs = async (lang) => {
       const fullPath = join(baseDir, file);
       const raw = await readFile(fullPath, 'utf-8');
       const { data, content } = matter(raw);
-      const pathSegment = relative(baseDir, fullPath).replace(/\.mdx?$/, '');
+      const pathSegment = toPathSegment(relative(baseDir, fullPath));
 
       return {
         title: data.title ?? basename(file).replace(/\.mdx?$/, ''),
         description: data.description ?? '',
         content: mdToText(content),
-        path: `/${lang}/${pathSegment}`,
+        path: `/${lang}/${pathSegment}`.replace(/\/+$/, ''),
         category: 'menu.main.docs',
       };
     })
@@ -106,13 +120,13 @@ export const getApi = async (lang) => {
           const fullPath = join(baseDir, file);
           const raw = await readFile(fullPath, 'utf-8');
           const { data, content } = matter(raw);
-          const pathSegment = relative(baseDir, fullPath).replace(/\.mdx?$/, '');
+          const pathSegment = toPathSegment(relative(baseDir, fullPath));
 
           return {
             title: data.title ?? basename(file).replace(/\.mdx?$/, ''),
             description: data.description ?? '',
             content: mdToText(content),
-            path: `/${lang}/${version}/${pathSegment}`,
+            path: `/${lang}/${version}/${pathSegment}`.replace(/\/+$/, ''),
             category: 'menu.main.api',
             version,
           };

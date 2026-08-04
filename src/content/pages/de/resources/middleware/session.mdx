@@ -5,11 +5,12 @@ description: Einfache Sitzungs-Middleware für Express
 
 import MiddlewareInfo from '@components/patterns/MiddlewareInfo/MiddlewareInfo.astro';
 import Alert from '@components/primitives/Alert/Alert.astro';
+import PackageManagerCommand from '@components/patterns/PackageManagerCommand/PackageManagerCommand.astro';
 
 <MiddlewareInfo
-  version="0.1.0"
+  version="1.19.0"
   github="https://github.com/express js/Sitzung"
-  npm="https://www.npmjs.com/package/session"
+  npm="https://www.npmjs.com/package/express-session"
 />
 
 ## Installation
@@ -18,9 +19,15 @@ Dies ist ein [Node.js](https://nodejs.org/en/) Modul über die
 [npm Registry](https://www.npmjs.com/). Installation erfolgt mit dem
 [`npm install` Befehl](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
-```sh
-$ npm install express-session
-```
+<PackageManagerCommand command="npm install express-session" />
+
+<Alert type="info">
+
+`express-session` does not include its own TypeScript type definitions. If you use TypeScript, also install the community-maintained types from [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped) as a development dependency:
+
+<PackageManagerCommand command="npm install --save-dev @types/express-session" />
+
+</Alert>
 
 ## API
 
@@ -124,9 +131,8 @@ Gibt den `boolean` Wert für das [`Partitioned` `Set-Cookie`](https://github.com
 Attribut an. Wenn Wahrheit, ist das `Partitioned` Attribut gesetzt, andernfalls nicht.
 Standardmäßig ist das Attribut `Partitioned` nicht gesetzt.
 
-**Notiz** Dies ist ein Attribut, das noch nicht vollständig standardisiert wurde und in Zukunft
-ändern kann. Dies bedeutet auch, dass viele Kunden dieses Attribut ignorieren können, bis sie es
-verstehen.
+**Notiz** Dies ist ein Attribut, das noch nicht vollständig standardisiert wurde und in Zukunft in
+ändern kann. Dies bedeutet auch, dass viele Clients dieses Attribut ignorieren können, bis sie es verstehen.
 
 Weitere Informationen finden Sie in [dem Vorschlag](https://github.com/privacycg/CHIPS).
 
@@ -164,7 +170,7 @@ Standardmäßig ist dies `false`.
 Weitere Informationen über die verschiedenen Durchsetzungsstufen finden Sie unter
 [die Spezifikation][rfc-6265bis-03-4.1.2.7].
 
-**Notiz** Dies ist ein Attribut, das noch nicht vollständig standardisiert wurde und in Zukunft in
+**Notiz** Dies ist ein Attribut, das noch nicht vollständig standardisiert wurde und in Zukunft
 ändern kann. Dies bedeutet auch, dass viele Clients dieses Attribut ignorieren können, bis sie es verstehen.
 
 **Hinweis** Es gibt ein [Entwurfsspekta](https://tools.ietf.org/html/draft-west-cookie-incrementalism-01)
@@ -285,8 +291,7 @@ Erzwingt die Sitzung, wieder im Session-Store zu speichern, selbst wenn die Sitz
 während der Anfrage nie geändert wurde. Abhängig von Ihrem Shop könnte dies
 notwendig sein aber es kann auch Rennbedingungen schaffen, bei denen ein Client zwei
 parallele Anfragen an Ihren Server stellt und Änderungen an der Sitzung in einer
-Anfrage können überschrieben werden, wenn die andere Anfrage beendet ist. auch wenn es keine
-Änderungen vorgenommen hat (dieses Verhalten hängt auch davon ab, welcher Shop Sie verwenden).
+Anfrage können überschrieben werden, wenn die andere Anfrage beendet ist.
 
 Der Standardwert ist `true`, aber die Verwendung des Standardwertes wurde veraltet,
 als Standardwert wird sich in Zukunft ändern. Bitte prüfen Sie diese Einstellung
@@ -716,7 +721,7 @@ und andere Multi-Core-Embedded Geräte).
 [verbinden-session-knex-url]: https://www.npmjs.com/package/connect-session-knex
 
 [![★][connect-session-sequelize-image] connect-session-sequelize][connect-session-sequelize-url] Ein Session-Shop mit
-[Sequelize.js](http://sequelizejs.com/), einem Knoten. s / io.js ORM für PostgreSQL, MySQL, SQLite und MSSQL.
+[Sequelize.js](https://sequelize.org/), einem Knoten. s / io.js ORM für PostgreSQL, MySQL, SQLite und MSSQL.
 
 [connect-session-sequelize-url]: https://www.npmjs.com/package/connect-session-sequelize
 
@@ -735,10 +740,6 @@ und andere Multi-Core-Embedded Geräte).
 [![★][dynamodb-store-image] Dynamodb-store][dynamodb-store-url] Ein DynamoDB-basierter Session-Shop.
 
 [dynamodb-store-url]: https://www.npmjs.com/package/dynamodb-store
-
-[![★][dynamodb-store-v3-image] dynamodb-store-v3][dynamodb-store-v3-url] Implementierung eines Session-Shops mit DynamoDB unterstützt durch das [AWS SDK für JavaScript v3](https://github.com/aws/aws-sdk-js-v3).
-
-[dynamodb-store-v3-url]: https://www.npmjs.com/package/dynamodb-store-v3
 
 [![★][express-etcd-image] express-etcd][express-etcd-url] Ein [etcd](https://github.com/stianeikeland/node-etcd) basierter Session-Shop.
 
@@ -825,7 +826,7 @@ basierter Session-Shop. Unterstützt alle von Fortune unterstützten Backends (M
 
 [restsession-url]: https://www.npmjs.com/package/restsession
 
-[![★][sequelstore-connect-image] sequelstore-connect][sequelstore-connect-url] Ein Session-Shop mit [Sequelize.js](http://sequelizejs.com/).
+[![★][sequelstore-connect-image] sequelstore-connect][sequelstore-connect-url] Ein Session-Shop mit [Sequelize.js](https://sequelize.org/).
 
 [sequelstore-connect-url]: https://www.npmjs.com/package/sequelstore-connect
 
@@ -836,10 +837,6 @@ basierter Session-Shop. Unterstützt alle von Fortune unterstützten Backends (M
 [![★][session-pouchdb-store-image] session-pouchdb-store][session-pouchdb-store-url] Session Store für PouchDB / CouchDB. Akzeptiert eingebettete, benutzerdefinierte oder entfernte PouchDB-Instanz und Echtzeit-Synchronisation.
 
 [session-pouchdb-store-url]: https://www.npmjs.com/package/session-pouchdb-store
-
-[![★][@cyclic.sh/session-store-image] @cyclic.sh/session-store][@cyclic.sh/session-store-url] Ein DynamoDB-basierter Session Store für [Cyclic.sh](https://www.cyclic.sh/) Apps.
-
-[@cyclic.sh/session-store-url]: https://www.npmjs.com/package/@cyclic.sh/session-store
 
 [![★][@databasunker/session-store-image] @databasunker/session-store][@databasunker/session-store-url] A [Databunker](https://databunker.org/)-based encrypted session store.
 

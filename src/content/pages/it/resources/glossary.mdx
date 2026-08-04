@@ -7,7 +7,7 @@ import Alert from '@components/primitives/Alert/Alert.astro';
 
 ## applicazione
 
-In generale, uno o più programmi che sono progettati per effettuare operazioni per uno scopo specifico. Nel contesto di Express, un programma che utilizza l'API Express in esecuzione sulla piattaforma Node.js. Potrebbe anche fare riferimento a un [app object](/en/api#express).
+In generale, uno o più programmi che sono progettati per effettuare operazioni per uno scopo specifico. Nel contesto di Express, un programma che utilizza l'API Express in esecuzione sulla piattaforma Node.js. Potrebbe anche fare riferimento a un [app object](/api#express).
 
 ## API
 
@@ -27,7 +27,7 @@ Una funzione che viene invocata dallo strato di routing Express prima del gestor
 
 - `var foo = require('middleware')` si chiama _requiring_ o _using_ un modulo Node.js. Quindi la dichiarazione `var mw = foo()` restituisce tipicamente il middleware.
 - `app.use(mw)` si chiama _aggiungendo il middleware allo stack globale di elaborazione_.
-- `app.get('/foo', mw, function (req, res) { ... })` si chiama \_aggiungendo il middleware allo stack di elaborazione "GET /foo" .
+- `app.get('/foo', mw, (req, res) => { /* ... */ })` is called _adding the middleware to the "GET /foo" processing stack_.
 
 ## Node.js
 
@@ -58,4 +58,4 @@ Parte di un URL che identifica una risorsa. Ad esempio, in `http://foo.com/produ
 
 ## router
 
-Vedi [router](/en/api#router) nel riferimento API.
+Vedi [router](/api#router) nel riferimento API.

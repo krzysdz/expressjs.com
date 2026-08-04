@@ -5,11 +5,12 @@ description: Simple session middleware for Express
 
 import MiddlewareInfo from '@components/patterns/MiddlewareInfo/MiddlewareInfo.astro';
 import Alert from '@components/primitives/Alert/Alert.astro';
+import PackageManagerCommand from '@components/patterns/PackageManagerCommand/PackageManagerCommand.astro';
 
 <MiddlewareInfo
-  version="0.1.0"
+  version="1.19.0"
   github="https://github.com/expressjs/session"
-  npm="https://www.npmjs.com/package/session"
+  npm="https://www.npmjs.com/package/express-session"
 />
 
 ## Installation
@@ -18,9 +19,15 @@ This is a [Node.js](https://nodejs.org/en/) module available through the
 [npm registry](https://www.npmjs.com/). Installation is done using the
 [`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
-```sh
-$ npm install express-session
-```
+<PackageManagerCommand command="npm install express-session" />
+
+<Alert type="info">
+
+`express-session` does not include its own TypeScript type definitions. If you use TypeScript, also install the community-maintained types from [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped) as a development dependency:
+
+<PackageManagerCommand command="npm install --save-dev @types/express-session" />
+
+</Alert>
 
 ## API
 
@@ -124,9 +131,7 @@ Specifies the `boolean` value for the [`Partitioned` `Set-Cookie`](https://githu
 attribute. When truthy, the `Partitioned` attribute is set, otherwise it is not.
 By default, the `Partitioned` attribute is not set.
 
-**Note** This is an attribute that has not yet been fully standardized, and may
-change in the future. This also means many clients may ignore this attribute until
-they understand it.
+**Note** This is an attribute that has not yet been fully standardized, and may change in the future. This also means many clients may ignore this attribute until they understand it.
 
 More information about can be found in [the proposal](https://github.com/privacycg/CHIPS).
 
@@ -146,8 +151,10 @@ Specifies the `string` to be the value for the [`Priority` `Set-Cookie` attribut
 More information about the different priority levels can be found in
 [the specification][rfc-west-cookie-priority-00-4.1].
 
-**Note** This is an attribute that has not yet been fully standardized, and may change in the future.
-This also means many clients may ignore this attribute until they understand it.
+**Note** This is an attribute that has not yet been fully standardized, and may
+change in the future.
+This also means many clients may ignore this attribute until
+they understand it.
 
 ##### cookie.sameSite
 
@@ -165,7 +172,8 @@ More information about the different enforcement levels can be found in
 [the specification][rfc-6265bis-03-4.1.2.7].
 
 **Note** This is an attribute that has not yet been fully standardized, and may change in
-the future. This also means many clients may ignore this attribute until they understand it.
+the future. This also means many clients may ignore this attribute until
+they understand it.
 
 **Note** There is a [draft spec](https://tools.ietf.org/html/draft-west-cookie-incrementalism-01)
 that requires that the `Secure` attribute be set to `true` when the `SameSite` attribute has been
@@ -716,7 +724,7 @@ and other multi-core embedded devices).
 [connect-session-knex-url]: https://www.npmjs.com/package/connect-session-knex
 
 [![★][connect-session-sequelize-image] connect-session-sequelize][connect-session-sequelize-url] A session store using
-[Sequelize.js](http://sequelizejs.com/), which is a Node.js / io.js ORM for PostgreSQL, MySQL, SQLite and MSSQL.
+[Sequelize.js](https://sequelize.org/), which is a Node.js / io.js ORM for PostgreSQL, MySQL, SQLite and MSSQL.
 
 [connect-session-sequelize-url]: https://www.npmjs.com/package/connect-session-sequelize
 
@@ -735,10 +743,6 @@ and other multi-core embedded devices).
 [![★][dynamodb-store-image] dynamodb-store][dynamodb-store-url] A DynamoDB-based session store.
 
 [dynamodb-store-url]: https://www.npmjs.com/package/dynamodb-store
-
-[![★][dynamodb-store-v3-image] dynamodb-store-v3][dynamodb-store-v3-url] Implementation of a session store using DynamoDB backed by the [AWS SDK for JavaScript v3](https://github.com/aws/aws-sdk-js-v3).
-
-[dynamodb-store-v3-url]: https://www.npmjs.com/package/dynamodb-store-v3
 
 [![★][express-etcd-image] express-etcd][express-etcd-url] An [etcd](https://github.com/stianeikeland/node-etcd) based session store.
 
@@ -825,7 +829,7 @@ based session store. Supports all backends supported by Fortune (MongoDB, Redis,
 
 [restsession-url]: https://www.npmjs.com/package/restsession
 
-[![★][sequelstore-connect-image] sequelstore-connect][sequelstore-connect-url] A session store using [Sequelize.js](http://sequelizejs.com/).
+[![★][sequelstore-connect-image] sequelstore-connect][sequelstore-connect-url] A session store using [Sequelize.js](https://sequelize.org/).
 
 [sequelstore-connect-url]: https://www.npmjs.com/package/sequelstore-connect
 
@@ -836,10 +840,6 @@ based session store. Supports all backends supported by Fortune (MongoDB, Redis,
 [![★][session-pouchdb-store-image] session-pouchdb-store][session-pouchdb-store-url] Session store for PouchDB / CouchDB. Accepts embedded, custom, or remote PouchDB instance and realtime synchronization.
 
 [session-pouchdb-store-url]: https://www.npmjs.com/package/session-pouchdb-store
-
-[![★][@cyclic.sh/session-store-image] @cyclic.sh/session-store][@cyclic.sh/session-store-url] A DynamoDB-based session store for [Cyclic.sh](https://www.cyclic.sh/) apps.
-
-[@cyclic.sh/session-store-url]: https://www.npmjs.com/package/@cyclic.sh/session-store
 
 [![★][@databunker/session-store-image] @databunker/session-store][@databunker/session-store-url] A [Databunker](https://databunker.org/)-based encrypted session store.
 

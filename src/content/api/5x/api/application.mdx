@@ -4,15 +4,41 @@ description: Learn about the properties of the Express application object.
 ---
 
 import Alert from '@components/primitives/Alert/Alert.astro';
+import Signature from '@components/patterns/Signature/Signature.astro';
+import Param from '@components/patterns/Signature/Param.astro';
 
 The `app` object conventionally denotes the Express application.
 Create it by calling the top-level `express()` function exported by the Express module:
 
-```js
+```cjs title="index.cjs"
 var express = require('express');
 var app = express();
 
 app.get('/', function (req, res) {
+  res.send('hello world');
+});
+
+app.listen(3000);
+```
+
+```mjs title="index.mjs"
+import express from 'express';
+
+const app = express();
+
+app.get('/', function (req, res) {
+  res.send('hello world');
+});
+
+app.listen(3000);
+```
+
+```ts title="index.ts"
+import express, { type Express, type Request, type Response } from 'express';
+
+const app: Express = express();
+
+app.get('/', function (req: Request, res: Response) {
   res.send('hello world');
 });
 
@@ -30,16 +56,19 @@ It also has settings (properties) that affect how the application behaves;
 for more information, see [Application settings](#application-settings).
 
 <Alert type="info">
-  The Express application object can be referred from the [request object](#req) and the [response
-  object](#res) as `req.app`, and `res.app`, respectively.
+
+The Express application object can be referred from the [request object](/api/request/) and the [response object](/api/response/) as `req.app`, and `res.app`, respectively.
+
 </Alert>
 
 ## Properties
 
 ### app.locals
 
+<Signature type="Object" />
+
 The `app.locals` object has properties that are local variables within the application,
-and will be available in templates rendered with [res.render](#res.render).
+and will be available in templates rendered with [res.render](/api/response/#resrender).
 
 <Alert type="warning">
 
@@ -59,12 +88,12 @@ console.dir(app.locals.email);
 ```
 
 Once set, the value of `app.locals` properties persist throughout the life of the application,
-in contrast with [res.locals](#res.locals) properties that
+in contrast with [res.locals](/api/response/#reslocals) properties that
 are valid only for the lifetime of the request.
 
 You can access local variables in templates rendered within the application.
 This is useful for providing helper functions to templates, as well as application-level data.
-Local variables are available in middleware via `req.app.locals` (see [req.app](#req.app))
+Local variables are available in middleware via `req.app.locals` (see [req.app](/api/request/#reqapp))
 
 ```js
 app.locals.title = 'My App';
@@ -74,6 +103,8 @@ app.locals.email = 'me@myapp.com';
 
 ### app.mountpath
 
+<Signature type="String | String[]" />
+
 The `app.mountpath` property contains one or more path patterns on which a sub-app was mounted.
 
 <Alert type="info">
@@ -82,7 +113,7 @@ A sub-app is an instance of `express` that may be used for handling the request 
 
 </Alert>
 
-```js
+```cjs title="index.cjs"
 const express = require('express');
 
 const app = express(); // the main app
@@ -96,7 +127,35 @@ admin.get('/', (req, res) => {
 app.use('/admin', admin); // mount the sub app
 ```
 
-It is similar to the [baseUrl](#req.baseUrl) property of the `req` object, except `req.baseUrl`
+```mjs title="index.mjs"
+import express from 'express';
+
+const app = express(); // the main app
+const admin = express(); // the sub app
+
+admin.get('/', (req, res) => {
+  console.log(admin.mountpath); // /admin
+  res.send('Admin Homepage');
+});
+
+app.use('/admin', admin); // mount the sub app
+```
+
+```ts title="index.ts"
+import express, { type Express, type Request, type Response } from 'express';
+
+const app: Express = express(); // the main app
+const admin: Express = express(); // the sub app
+
+admin.get('/', (req: Request, res: Response) => {
+  console.log(admin.mountpath); // /admin
+  res.send('Admin Homepage');
+});
+
+app.use('/admin', admin); // mount the sub app
+```
+
+It is similar to the [baseUrl](/api/request/#reqbaseurl) property of the `req` object, except `req.baseUrl`
 returns the matched URL path, instead of the matched patterns.
 
 If a sub-app is mounted on multiple path patterns, `app.mountpath` returns the list of
@@ -120,11 +179,33 @@ admin.use('/secr{*splat}t', secret); // load the 'secret' router on '/secr{*spla
 app.use(['/adm{*splat}n', '/manager'], admin); // load the 'admin' router on '/adm{*splat}n' and '/manager', on the parent app
 ```
 
+```ts
+import express, { type Express, type Request, type Response } from 'express';
+
+const admin: Express = express();
+
+admin.get('/', (req: Request, res: Response) => {
+  console.log(admin.mountpath); // [ '/adm{*splat}n', '/manager' ]
+  res.send('Admin Homepage');
+});
+
+const secret: Express = express();
+secret.get('/', (req: Request, res: Response) => {
+  console.log(secret.mountpath); // /secr{*splat}t
+  res.send('Admin Secret');
+});
+
+admin.use('/secr{*splat}t', secret); // load the 'secret' router on '/secr{*splat}t', on the 'admin' sub app
+app.use(['/adm{*splat}n', '/manager'], admin); // load the 'admin' router on '/adm{*splat}n' and '/manager', on the parent app
+```
+
 ### app.router
+
+<Signature type="Router" />
 
 The application's in-built instance of router. This is created lazily, on first access.
 
-```js
+```cjs title="index.cjs"
 const express = require('express');
 const app = express();
 const router = app.router;
@@ -136,25 +217,59 @@ router.get('/', (req, res) => {
 app.listen(3000);
 ```
 
+```mjs title="index.mjs"
+import express from 'express';
+
+const app = express();
+const router = app.router;
+
+router.get('/', (req, res) => {
+  res.send('hello world');
+});
+
+app.listen(3000);
+```
+
+```ts title="index.ts"
+import express, { type Express, type Request, type Response } from 'express';
+
+const app: Express = express();
+const router = app.router;
+
+router.get('/', (req: Request, res: Response) => {
+  res.send('hello world');
+});
+
+app.listen(3000);
+```
+
 You can add middleware and HTTP method routes to the `router` just like an application.
 
-For more information, see [Router](#router).
+For more information, see [Router](/api/router/).
 
 ## Events
 
-### app.on('mount', callback(parent))
+### app.on('mount')
+
+<Signature>
+  <Fragment slot="attributes">
+    <Param name="callback" type="Function">
+      The listener called when the `mount` event fires. It receives the parent app as its only
+      argument: `callback(parent)`.
+    </Param>
+  </Fragment>
+</Signature>
 
 The `mount` event is fired on a sub-app, when it is mounted on a parent app. The parent app is passed to the callback function.
 
 <Alert type="info">
-**NOTE**
 
 Sub-apps will:
 
 - Not inherit the value of settings that have a default value. You must set the value in the sub-app.
 - Inherit the value of settings with no default value.
 
-For details, see [Application settings](/en/api/application/app-set#app.settings.table).
+For details, see [Application settings](#application-settings).
 
 </Alert>
 
@@ -173,19 +288,50 @@ admin.get('/', (req, res) => {
 app.use('/admin', admin);
 ```
 
+```ts
+import express, { type Express, type Application, type Request, type Response } from 'express';
+
+const admin: Express = express();
+
+admin.on('mount', (parent: Application) => {
+  console.log('Admin Mounted');
+  console.log(parent); // refers to the parent app
+});
+
+admin.get('/', (req: Request, res: Response) => {
+  res.send('Admin Homepage');
+});
+
+app.use('/admin', admin);
+```
+
 ## Methods
 
-### app.all(path, callback [, callback ...])
+### app.all()
+
+<Signature>
+  <Fragment slot="attributes">
+    <Param name="path" type="String | RegExp | Array">
+      The path for which the middleware function is invoked; can be any of: a string representing a
+      path, a path pattern, a regular expression pattern to match paths, or an array of combinations
+      of any of the above. For examples, see [Path examples](#path-examples).
+    </Param>
+    <Param name="callback" type="Function | Function[]">
+      Callback functions; can be: a middleware function, a series of middleware functions (separated
+      by commas), an array of middleware functions, or a combination of all of the above. You can
+      provide multiple callback functions that behave just like middleware, except that these
+      callbacks can invoke `next('route')` to bypass the remaining route callback(s). You can use
+      this mechanism to impose pre-conditions on a route, then pass control to subsequent routes if
+      there is no reason to proceed with the current route. Since [router](/api/router/) and
+      [app](/api/application/) implement the middleware interface, you can use them as you would any
+      other middleware function. For examples, see [Middleware callback function
+      examples](#middleware-callback-function-examples).
+    </Param>
+  </Fragment>
+</Signature>
 
 This method is like the standard [app.METHOD()](#appmethod) methods,
 except it matches all HTTP verbs.
-
-#### Arguments
-
-| Argument   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Default           |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| `path`     | The path for which the middleware function is invoked. It can be any of the following: a string representing a path, a path pattern, a regular expression pattern to match paths, or an array containing any combination of the above. For examples, see [Path examples](#path-examples).                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `'/'` (root path) |
-| `callback` | One or more callback functions. Accepted formats: a single middleware function, multiple middleware functions separated by commas, an array of middleware functions, or a combination of the above. You may provide multiple callbacks that behave like middleware. These can call `next('route')` to skip remaining callbacks for the current route. This is useful for conditional routing logic. If a callback throws an error or returns a rejected promise, `next(err)` is invoked automatically. Since both [router](#router) and [app](#application) implement the middleware interface, they can also be used as callback middleware. For examples, see [Middleware callback function examples](#middleware-callback-function-examples). | _None_            |
 
 #### Examples
 
@@ -194,6 +340,15 @@ GET, POST, PUT, DELETE, or any other HTTP request method:
 
 ```js
 app.all('/secret', (req, res, next) => {
+  console.log('Accessing the secret section ...');
+  next(); // pass control to the next handler
+});
+```
+
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+app.all('/secret', (req: Request, res: Response, next: NextFunction) => {
   console.log('Accessing the secret section ...');
   next(); // pass control to the next handler
 });
@@ -225,17 +380,31 @@ The example is similar to the ones above, but it only restricts paths that start
 app.all('/api/{*splat}', requireAuthentication);
 ```
 
-### app.delete(path, callback [, callback ...])
+### app.delete()
+
+<Signature>
+  <Fragment slot="attributes">
+    <Param name="path" type="String | RegExp | Array">
+      The path for which the middleware function is invoked; can be any of: a string representing a
+      path, a path pattern, a regular expression pattern to match paths, or an array of combinations
+      of any of the above. For examples, see [Path examples](#path-examples).
+    </Param>
+    <Param name="callback" type="Function | Function[]">
+      Callback functions; can be: a middleware function, a series of middleware functions (separated
+      by commas), an array of middleware functions, or a combination of all of the above. You can
+      provide multiple callback functions that behave just like middleware, except that these
+      callbacks can invoke `next('route')` to bypass the remaining route callback(s). You can use
+      this mechanism to impose pre-conditions on a route, then pass control to subsequent routes if
+      there is no reason to proceed with the current route. Since [router](/api/router/) and
+      [app](/api/application/) implement the middleware interface, you can use them as you would any
+      other middleware function. For examples, see [Middleware callback function
+      examples](#middleware-callback-function-examples).
+    </Param>
+  </Fragment>
+</Signature>
 
 Routes HTTP DELETE requests to the specified path with the specified callback functions.
-For more information, see the [routing guide](/en/guide/routing).
-
-#### Arguments
-
-| Argument   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Default           |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| `path`     | The path for which the middleware function is invoked. It can be any of the following: a string representing a path, a path pattern, a regular expression pattern to match paths, or an array containing any combination of the above. For examples, see [Path examples](#path-examples).                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `'/'` (root path) |
-| `callback` | One or more callback functions. Accepted formats: a single middleware function, multiple middleware functions separated by commas, an array of middleware functions, or a combination of the above. You may provide multiple callbacks that behave like middleware. These can call `next('route')` to skip remaining callbacks for the current route. This is useful for conditional routing logic. If a callback throws an error or returns a rejected promise, `next(err)` is invoked automatically. Since both [router](#router) and [app](#application) implement the middleware interface, they can also be used as callback middleware. For examples, see [Middleware callback function examples](#middleware-callback-function-examples). | _None_            |
+For more information, see the [routing guide](/guide/routing/).
 
 #### Example
 
@@ -245,9 +414,26 @@ app.delete('/', (req, res) => {
 });
 ```
 
-### app.disable(name)
+```ts
+import { type Request, type Response } from 'express';
 
-Sets the Boolean setting `name` to `false`, where `name` is one of the properties from the [app settings table](/en/api/application/app-set#app.settings.table).
+app.delete('/', (req: Request, res: Response) => {
+  res.send('DELETE request to homepage');
+});
+```
+
+### app.disable()
+
+<Signature returns="Application">
+  <Fragment slot="attributes">
+    <Param name="name" type="String">
+      The name of the Boolean setting to disable; one of the properties from the [app settings
+      table](#application-settings).
+    </Param>
+  </Fragment>
+</Signature>
+
+Sets the Boolean setting `name` to `false`, where `name` is one of the properties from the [app settings table](#application-settings).
 Calling `app.set('foo', false)` for a Boolean property is the same as calling `app.disable('foo')`.
 
 For example:
@@ -258,10 +444,19 @@ app.get('trust proxy');
 // => false
 ```
 
-### app.disabled(name)
+### app.disabled()
+
+<Signature returns="Boolean">
+  <Fragment slot="attributes">
+    <Param name="name" type="String">
+      The name of the Boolean setting to test; one of the properties from the [app settings
+      table](#application-settings).
+    </Param>
+  </Fragment>
+</Signature>
 
 Returns `true` if the Boolean setting `name` is disabled (`false`), where `name` is one of the properties from
-the [app settings table](/en/api/application/app-set#app.settings.table).
+the [app settings table](#application-settings).
 
 ```js
 app.disabled('trust proxy');
@@ -272,9 +467,18 @@ app.disabled('trust proxy');
 // => false
 ```
 
-### app.enable(name)
+### app.enable()
 
-Sets the Boolean setting `name` to `true`, where `name` is one of the properties from the [app settings table](/en/api/application/app-set#app.settings.table).
+<Signature returns="Application">
+  <Fragment slot="attributes">
+    <Param name="name" type="String">
+      The name of the Boolean setting to enable; one of the properties from the [app settings
+      table](#application-settings).
+    </Param>
+  </Fragment>
+</Signature>
+
+Sets the Boolean setting `name` to `true`, where `name` is one of the properties from the [app settings table](#application-settings).
 Calling `app.set('foo', true)` for a Boolean property is the same as calling `app.enable('foo')`.
 
 ```js
@@ -283,10 +487,19 @@ app.get('trust proxy');
 // => true
 ```
 
-### app.enabled(name)
+### app.enabled()
+
+<Signature returns="Boolean">
+  <Fragment slot="attributes">
+    <Param name="name" type="String">
+      The name of the setting to test; one of the properties from the [app settings
+      table](#application-settings).
+    </Param>
+  </Fragment>
+</Signature>
 
 Returns `true` if the setting `name` is enabled (`true`), where `name` is one of the
-properties from the [app settings table](/en/api/application/app-set#app.settings.table).
+properties from the [app settings table](#application-settings).
 
 ```js
 app.enabled('trust proxy');
@@ -297,7 +510,18 @@ app.enabled('trust proxy');
 // => true
 ```
 
-### app.engine(ext, callback)
+### app.engine()
+
+<Signature returns="Application">
+  <Fragment slot="attributes">
+    <Param name="ext" type="String">
+      The file extension the template engine is registered for (for example, `pug` or `html`).
+    </Param>
+    <Param name="callback" type="Function">
+      The template engine function used to render files with the given extension.
+    </Param>
+  </Fragment>
+</Signature>
 
 Registers the given template engine `callback` as `ext`.
 
@@ -328,16 +552,32 @@ Some template engines do not follow this convention. The
 [consolidate.js](https://github.com/tj/consolidate.js) library maps Node template engines to follow this convention,
 so they work seamlessly with Express.
 
-```js
+```cjs title="index.cjs"
 const engines = require('consolidate');
+app.engine('haml', engines.haml);
+app.engine('html', engines.hogan);
+```
+
+```mjs title="index.mjs"
+import engines from 'consolidate';
+
 app.engine('haml', engines.haml);
 app.engine('html', engines.hogan);
 ```
 
 ### app.get(name)
 
+<Signature returns="any">
+  <Fragment slot="attributes">
+    <Param name="name" type="String">
+      The name of the setting to read; one of the strings in the [app settings
+      table](#application-settings).
+    </Param>
+  </Fragment>
+</Signature>
+
 Returns the value of `name` app setting, where `name` is one of the strings in the
-[app settings table](/en/api/application/app-set#app.settings.table). For example:
+[app settings table](#application-settings). For example:
 
 ```js
 app.get('title');
@@ -348,18 +588,32 @@ app.get('title');
 // => "My Site"
 ```
 
-### app.get(path, callback [, callback ...])
+### app.get()
+
+<Signature>
+  <Fragment slot="attributes">
+    <Param name="path" type="String | RegExp | Array">
+      The path for which the middleware function is invoked; can be any of: a string representing a
+      path, a path pattern, a regular expression pattern to match paths, or an array of combinations
+      of any of the above. For examples, see [Path examples](#path-examples).
+    </Param>
+    <Param name="callback" type="Function | Function[]">
+      Callback functions; can be: a middleware function, a series of middleware functions (separated
+      by commas), an array of middleware functions, or a combination of all of the above. You can
+      provide multiple callback functions that behave just like middleware, except that these
+      callbacks can invoke `next('route')` to bypass the remaining route callback(s). You can use
+      this mechanism to impose pre-conditions on a route, then pass control to subsequent routes if
+      there is no reason to proceed with the current route. Since [router](/api/router/) and
+      [app](/api/application/) implement the middleware interface, you can use them as you would any
+      other middleware function. For examples, see [Middleware callback function
+      examples](#middleware-callback-function-examples).
+    </Param>
+  </Fragment>
+</Signature>
 
 Routes HTTP GET requests to the specified path with the specified callback functions.
 
-#### Arguments
-
-| Argument   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Default           |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| `path`     | The path for which the middleware function is invoked. It can be any of the following: a string representing a path, a path pattern, a regular expression pattern to match paths, or an array containing any combination of the above. For examples, see [Path examples](#path-examples).                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `'/'` (root path) |
-| `callback` | One or more callback functions. Accepted formats: a single middleware function, multiple middleware functions separated by commas, an array of middleware functions, or a combination of the above. You may provide multiple callbacks that behave like middleware. These can call `next('route')` to skip remaining callbacks for the current route. This is useful for conditional routing logic. If a callback throws an error or returns a rejected promise, `next(err)` is invoked automatically. Since both [router](#router) and [app](#application) implement the middleware interface, they can also be used as callback middleware. For examples, see [Middleware callback function examples](#middleware-callback-function-examples). | _None_            |
-
-For more information, see the [routing guide](/en/guide/routing).
+For more information, see the [routing guide](/guide/routing/).
 
 #### Example
 
@@ -369,29 +623,84 @@ app.get('/', (req, res) => {
 });
 ```
 
-### app.listen(path, [callback])
+```ts
+import { type Request, type Response } from 'express';
 
-Starts a UNIX socket and listens for connections on the given path.
-This method is identical to Node's [http.Server.listen()](https://nodejs.org/api/http.html#http_server_listen).
-
-```js
-const express = require('express');
-const app = express();
-app.listen('/tmp/sock');
+app.get('/', (req: Request, res: Response) => {
+  res.send('GET request to homepage');
+});
 ```
 
-### app.listen([port[, host[, backlog]]][, callback])
+### app.listen()
 
-Binds and listens for connections on the specified host and port.
-This method is identical to Node's [http.Server.listen()](https://nodejs.org/api/http.html#http_server_listen).
+<Signature returns="http.Server">
+  <Fragment slot="attributes">
+    <Param name="port" type="Number" optional>
+      The TCP port to listen on. If omitted or `0`, the OS assigns an arbitrary unused port.
+    </Param>
+    <Param name="host" type="String" optional>
+      The host on which to accept connections.
+    </Param>
+    <Param name="backlog" type="Number" optional>
+      The maximum length of the queue of pending connections.
+    </Param>
+    <Param name="path" type="String" optional>
+      The path of a UNIX socket to listen on, as an alternative to host and port.
+    </Param>
+    <Param name="callback" type="Function" optional>
+      A function called once the server is listening. If the server emits an `error` event (for
+      example `EADDRINUSE`), the error is passed to this callback as its argument.
+    </Param>
+  </Fragment>
+</Signature>
+
+Binds and listens for connections on the specified host and port, or starts a
+UNIX socket and listens for connections on the given path. This method is
+identical to Node's [http.Server.listen()](https://nodejs.org/api/http.html#serverlisten).
 
 If port is omitted or is 0, the operating system will assign an arbitrary unused
 port, which is useful for cases like automated tasks (tests, etc.).
 
-```js
+```cjs title="index.cjs"
 const express = require('express');
 const app = express();
-app.listen(3000);
+
+app.listen(3000); // bind and listen on a TCP port
+app.listen('/tmp/sock'); // or listen on a UNIX socket
+```
+
+```mjs title="index.mjs"
+import express from 'express';
+
+const app = express();
+
+app.listen(3000); // bind and listen on a TCP port
+app.listen('/tmp/sock'); // or listen on a UNIX socket
+```
+
+```ts title="index.ts"
+import express, { type Express } from 'express';
+
+const app: Express = express();
+
+app.listen(3000); // bind and listen on a TCP port
+app.listen('/tmp/sock'); // or listen on a UNIX socket
+```
+
+<Alert type="info">
+
+When the server emits an `error` event (such as `EADDRINUSE`), the error is passed to the provided
+`callback`. Handle it inside the callback:
+
+</Alert>
+
+```js
+const server = app.listen(8080, '0.0.0.0', (error) => {
+  if (error) {
+    throw error; // e.g. EADDRINUSE
+  }
+  console.log(`Listening on ${JSON.stringify(server.address())}`);
+});
 ```
 
 The `app` returned by `express()` is in fact a JavaScript
@@ -400,7 +709,7 @@ to handle requests. This makes it easy to provide both HTTP and HTTPS versions o
 your app with the same code base, as the app does not inherit from these
 (it is simply a callback):
 
-```js
+```cjs title="index.cjs"
 const express = require('express');
 const https = require('https');
 const http = require('http');
@@ -410,7 +719,29 @@ http.createServer(app).listen(80);
 https.createServer(options, app).listen(443);
 ```
 
-The `app.listen()` method returns an [http.Server](https://nodejs.org/api/http.html#http_class_http_server) object and (for HTTP) is a convenience method for the following:
+```mjs title="index.mjs"
+import express from 'express';
+import https from 'https';
+import http from 'http';
+
+const app = express();
+
+http.createServer(app).listen(80);
+https.createServer(options, app).listen(443);
+```
+
+```ts title="index.ts"
+import express, { type Express } from 'express';
+import https from 'https';
+import http from 'http';
+
+const app: Express = express();
+
+http.createServer(app).listen(80);
+https.createServer(options, app).listen(443);
+```
+
+The `app.listen()` method returns an [http.Server](https://nodejs.org/api/http.html#class-httpserver) object and (for HTTP) is a convenience method for the following:
 
 ```js
 app.listen = function () {
@@ -422,111 +753,108 @@ app.listen = function () {
 <Alert type="info">
 
 All the forms of Node's
-[http.Server.listen()](https://nodejs.org/api/http.html#http_server_listen) method are in fact
+[http.Server.listen()](https://nodejs.org/api/http.html#serverlisten) method are in fact
 actually supported.
 
 </Alert>
 
-### app.METHOD(path, callback [, callback ...])
+### app.METHOD()
+
+<Signature>
+  <Fragment slot="attributes">
+    <Param name="path" type="String | RegExp | Array">
+      The path for which the middleware function is invoked; can be any of: a string representing a
+      path, a path pattern, a regular expression pattern to match paths, or an array of combinations
+      of any of the above. For examples, see [Path examples](#path-examples).
+    </Param>
+    <Param name="callback" type="Function | Function[]">
+      Callback functions; can be: a middleware function, a series of middleware functions (separated
+      by commas), an array of middleware functions, or a combination of all of the above. You can
+      provide multiple callback functions that behave just like middleware, except that these
+      callbacks can invoke `next('route')` to bypass the remaining route callback(s). You can use
+      this mechanism to impose pre-conditions on a route, then pass control to subsequent routes if
+      there is no reason to proceed with the current route. Since [router](/api/router/) and
+      [app](/api/application/) implement the middleware interface, you can use them as you would any
+      other middleware function. For examples, see [Middleware callback function
+      examples](#middleware-callback-function-examples).
+    </Param>
+  </Fragment>
+</Signature>
 
 Routes an HTTP request, where METHOD is the HTTP method of the request, such as GET,
 PUT, POST, and so on, in lowercase. Thus, the actual methods are `app.get()`,
 `app.post()`, `app.put()`, and so on. See [Routing methods](#routing-methods) below for the complete list.
 
-#### Arguments
-
-| Argument   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Default           |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| `path`     | The path for which the middleware function is invoked. It can be any of the following: a string representing a path, a path pattern, a regular expression pattern to match paths, or an array containing any combination of the above. For examples, see [Path examples](#path-examples).                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `'/'` (root path) |
-| `callback` | One or more callback functions. Accepted formats: a single middleware function, multiple middleware functions separated by commas, an array of middleware functions, or a combination of the above. You may provide multiple callbacks that behave like middleware. These can call `next('route')` to skip remaining callbacks for the current route. This is useful for conditional routing logic. If a callback throws an error or returns a rejected promise, `next(err)` is invoked automatically. Since both [router](#router) and [app](#application) implement the middleware interface, they can also be used as callback middleware. For examples, see [Middleware callback function examples](#middleware-callback-function-examples). | _None_            |
-
 #### Routing methods
 
 Express supports the following routing methods corresponding to the HTTP methods of the same names:
 
-<div class="methods-columns">
-  <ul>
-    <li>
-      <code>checkout</code>
-    </li>
-    <li>
-      <code>copy</code>
-    </li>
-    <li>
-      <code>delete</code>
-    </li>
-    <li>
-      <code>get</code>
-    </li>
-    <li>
-      <code>head</code>
-    </li>
-    <li>
-      <code>lock</code>
-    </li>
-    <li>
-      <code>merge</code>
-    </li>
-    <li>
-      <code>mkactivity</code>
-    </li>
-  </ul>
-  <ul>
-    <li>
-      <code>mkcol</code>
-    </li>
-    <li>
-      <code>move</code>
-    </li>
-    <li>
-      <code>m-search</code>
-    </li>
-    <li>
-      <code>notify</code>
-    </li>
-    <li>
-      <code>options</code>
-    </li>
-    <li>
-      <code>patch</code>
-    </li>
-    <li>
-      <code>post</code>
-    </li>
-  </ul>
-  <ul>
-    <li>
-      <code>purge</code>
-    </li>
-    <li>
-      <code>put</code>
-    </li>
-    <li>
-      <code>report</code>
-    </li>
-    <li>
-      <code>search</code>
-    </li>
-    <li>
-      <code>subscribe</code>
-    </li>
-    <li>
-      <code>trace</code>
-    </li>
-    <li>
-      <code>unlock</code>
-    </li>
-    <li>
-      <code>unsubscribe</code>
-    </li>
-  </ul>
+<div class="columns-2">
+
+- `checkout`
+- `copy`
+- [`delete`](#appdelete)
+- [`get`](#appget)
+- `head`
+- `lock`
+- `merge`
+- `mkactivity`
+- `mkcol`
+- `move`
+- `m-search`
+- `notify`
+- `options`
+- `patch`
+- [`post`](#apppost)
+- `purge`
+- [`put`](#appput)
+- [`query`](#appquery)
+- `report`
+- `search`
+- `subscribe`
+- `trace`
+- `unlock`
+- `unsubscribe`
+
 </div>
 
 The API documentation has explicit entries only for the most popular HTTP methods `app.get()`,
-`app.post()`, `app.put()`, and `app.delete()`.
+`app.post()`, `app.put()`, `app.delete()`, and `app.query()`.
 However, the other methods listed above work in exactly the same way.
 
 To route methods that translate to invalid JavaScript variable names, use the bracket notation. For example, `app['m-search']('/', function ...`.
+
+```js ins={10}
+app.get('/', (req, res) => {
+  res.send('GET request to homepage');
+});
+
+app.post('/', (req, res) => {
+  res.send('POST request to homepage');
+});
+
+// methods that are invalid JavaScript variable names use bracket notation
+app['m-search']('/', (req, res) => {
+  res.send('M-SEARCH request to homepage');
+});
+```
+
+```ts
+import { type Request, type Response } from 'express';
+
+app.get('/', (req: Request, res: Response) => {
+  res.send('GET request to homepage');
+});
+
+app.post('/', (req: Request, res: Response) => {
+  res.send('POST request to homepage');
+});
+
+// methods that are invalid JavaScript variable names use bracket notation
+app['m-search']('/', (req: Request, res: Response) => {
+  res.send('M-SEARCH request to homepage');
+});
+```
 
 <Alert type="info">
 
@@ -539,11 +867,24 @@ The method, `app.all()`, is not derived from any HTTP method and loads middlewar
 the specified path for _all_ HTTP request methods.
 For more information, see [app.all](#appall).
 
-For more information on routing, see the [routing guide](/en/guide/routing).
+For more information on routing, see the [routing guide](/guide/routing/).
 
-### app.param(name, callback)
+### app.param()
 
-Add callback triggers to [route parameters](/en/guide/routing#route-parameters), where `name` is the name of the parameter or an array of them, and `callback` is the callback function. The parameters of the callback function are the request object, the response object, the next middleware, the value of the parameter and the name of the parameter, in that order.
+<Signature>
+  <Fragment slot="attributes">
+    <Param name="name" type="String | String[]">
+      The name of the route parameter, or an array of names.
+    </Param>
+    <Param name="callback" type="Function">
+      The trigger called as `callback(req, res, next, value, name)`: the request object, the
+      response object, the next middleware, the value of the parameter, and the name of the
+      parameter, in that order.
+    </Param>
+  </Fragment>
+</Signature>
+
+Add callback triggers to [route parameters](/guide/routing/#route-parameters), where `name` is the name of the parameter or an array of them, and `callback` is the callback function. The parameters of the callback function are the request object, the response object, the next middleware, the value of the parameter and the name of the parameter, in that order.
 
 If `name` is an array, the `callback` trigger is registered for each parameter declared in it, in the order in which they are declared. Furthermore, for each declared parameter except the last one, a call to `next` inside the callback will call the callback for the next declared parameter. For the last parameter, a call to `next` will call the next middleware in place for the route currently being processed, just like it would if `name` were just a string.
 
@@ -586,6 +927,25 @@ app.get('/user/:id', (req, res) => {
 });
 ```
 
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+app.param('id', (req: Request, res: Response, next: NextFunction, id: string) => {
+  console.log('CALLED ONLY ONCE');
+  next();
+});
+
+app.get('/user/:id', (req: Request, res: Response, next: NextFunction) => {
+  console.log('although this matches');
+  next();
+});
+
+app.get('/user/:id', (req: Request, res: Response) => {
+  console.log('and this matches too');
+  res.end();
+});
+```
+
 On `GET /user/42`, the following is printed:
 
 ```
@@ -611,6 +971,25 @@ app.get('/user/:id/:page', (req, res) => {
 });
 ```
 
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+app.param(['id', 'page'], (req: Request, res: Response, next: NextFunction, value: string) => {
+  console.log('CALLED ONLY ONCE with', value);
+  next();
+});
+
+app.get('/user/:id/:page', (req: Request, res: Response, next: NextFunction) => {
+  console.log('although this matches');
+  next();
+});
+
+app.get('/user/:id/:page', (req: Request, res: Response) => {
+  console.log('and this matches too');
+  res.end();
+});
+```
+
 On `GET /user/42/3`, the following is printed:
 
 ```
@@ -622,9 +1001,11 @@ and this matches too
 
 ### app.path()
 
+<Signature returns="String" />
+
 Returns the canonical path of the app, a string.
 
-```js
+```js title="index.js"
 const app = express();
 const blog = express();
 const blogAdmin = express();
@@ -637,20 +1018,49 @@ console.log(blog.path()); // '/blog'
 console.log(blogAdmin.path()); // '/blog/admin'
 ```
 
-The behavior of this method can become very complicated in complex cases of mounted apps:
-it is usually better to use [req.baseUrl](#req.baseUrl) to get the canonical path of the app.
+```ts title="index.ts"
+import express, { type Express } from 'express';
 
-### app.post(path, callback [, callback ...])
+const app: Express = express();
+const blog: Express = express();
+const blogAdmin: Express = express();
+
+app.use('/blog', blog);
+blog.use('/admin', blogAdmin);
+
+console.log(app.path()); // ''
+console.log(blog.path()); // '/blog'
+console.log(blogAdmin.path()); // '/blog/admin'
+```
+
+The behavior of this method can become very complicated in complex cases of mounted apps:
+it is usually better to use [req.baseUrl](/api/request/#reqbaseurl) to get the canonical path of the app.
+
+### app.post()
+
+<Signature>
+  <Fragment slot="attributes">
+    <Param name="path" type="String | RegExp | Array">
+      The path for which the middleware function is invoked; can be any of: a string representing a
+      path, a path pattern, a regular expression pattern to match paths, or an array of combinations
+      of any of the above. For examples, see [Path examples](#path-examples).
+    </Param>
+    <Param name="callback" type="Function | Function[]">
+      Callback functions; can be: a middleware function, a series of middleware functions (separated
+      by commas), an array of middleware functions, or a combination of all of the above. You can
+      provide multiple callback functions that behave just like middleware, except that these
+      callbacks can invoke `next('route')` to bypass the remaining route callback(s). You can use
+      this mechanism to impose pre-conditions on a route, then pass control to subsequent routes if
+      there is no reason to proceed with the current route. Since [router](/api/router/) and
+      [app](/api/application/) implement the middleware interface, you can use them as you would any
+      other middleware function. For examples, see [Middleware callback function
+      examples](#middleware-callback-function-examples).
+    </Param>
+  </Fragment>
+</Signature>
 
 Routes HTTP POST requests to the specified path with the specified callback functions.
-For more information, see the [routing guide](/en/guide/routing).
-
-#### Arguments
-
-| Argument   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Default           |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| `path`     | The path for which the middleware function is invoked. It can be any of the following: a string representing a path, a path pattern, a regular expression pattern to match paths, or an array containing any combination of the above. For examples, see [Path examples](#path-examples).                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `'/'` (root path) |
-| `callback` | One or more callback functions. Accepted formats: a single middleware function, multiple middleware functions separated by commas, an array of middleware functions, or a combination of the above. You may provide multiple callbacks that behave like middleware. These can call `next('route')` to skip remaining callbacks for the current route. This is useful for conditional routing logic. If a callback throws an error or returns a rejected promise, `next(err)` is invoked automatically. Since both [router](#router) and [app](#application) implement the middleware interface, they can also be used as callback middleware. For examples, see [Middleware callback function examples](#middleware-callback-function-examples). | _None_            |
+For more information, see the [routing guide](/guide/routing/).
 
 #### Example
 
@@ -660,16 +1070,38 @@ app.post('/', (req, res) => {
 });
 ```
 
-### app.put(path, callback [, callback ...])
+```ts
+import { type Request, type Response } from 'express';
+
+app.post('/', (req: Request, res: Response) => {
+  res.send('POST request to homepage');
+});
+```
+
+### app.put()
+
+<Signature>
+  <Fragment slot="attributes">
+    <Param name="path" type="String | RegExp | Array">
+      The path for which the middleware function is invoked; can be any of: a string representing a
+      path, a path pattern, a regular expression pattern to match paths, or an array of combinations
+      of any of the above. For examples, see [Path examples](#path-examples).
+    </Param>
+    <Param name="callback" type="Function | Function[]">
+      Callback functions; can be: a middleware function, a series of middleware functions (separated
+      by commas), an array of middleware functions, or a combination of all of the above. You can
+      provide multiple callback functions that behave just like middleware, except that these
+      callbacks can invoke `next('route')` to bypass the remaining route callback(s). You can use
+      this mechanism to impose pre-conditions on a route, then pass control to subsequent routes if
+      there is no reason to proceed with the current route. Since [router](/api/router/) and
+      [app](/api/application/) implement the middleware interface, you can use them as you would any
+      other middleware function. For examples, see [Middleware callback function
+      examples](#middleware-callback-function-examples).
+    </Param>
+  </Fragment>
+</Signature>
 
 Routes HTTP PUT requests to the specified path with the specified callback functions.
-
-#### Arguments
-
-| Argument   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Default           |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| `path`     | The path for which the middleware function is invoked. It can be any of the following: a string representing a path, a path pattern, a regular expression pattern to match paths, or an array containing any combination of the above. For examples, see [Path examples](#path-examples).                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `'/'` (root path) |
-| `callback` | One or more callback functions. Accepted formats: a single middleware function, multiple middleware functions separated by commas, an array of middleware functions, or a combination of the above. You may provide multiple callbacks that behave like middleware. These can call `next('route')` to skip remaining callbacks for the current route. This is useful for conditional routing logic. If a callback throws an error or returns a rejected promise, `next(err)` is invoked automatically. Since both [router](#router) and [app](#application) implement the middleware interface, they can also be used as callback middleware. For examples, see [Middleware callback function examples](#middleware-callback-function-examples). | _None_            |
 
 #### Example
 
@@ -679,10 +1111,103 @@ app.put('/', (req, res) => {
 });
 ```
 
-### app.render(view, [locals], callback)
+```ts
+import { type Request, type Response } from 'express';
+
+app.put('/', (req: Request, res: Response) => {
+  res.send('PUT request to homepage');
+});
+```
+
+### app.query()
+
+<Signature runtime={{ 'Node.js': '>=20.19.3 <21 || >=22.2.0' }}>
+  <Fragment slot="attributes">
+    <Param name="path" type="String | RegExp | Array">
+      The path for which the middleware function is invoked; can be any of: a string representing a
+      path, a path pattern, a regular expression pattern to match paths, or an array of combinations
+      of any of the above. For examples, see [Path examples](#path-examples).
+    </Param>
+    <Param name="callback" type="Function | Function[]">
+      Callback functions; can be: a middleware function, a series of middleware functions (separated
+      by commas), an array of middleware functions, or a combination of all of the above. You can
+      provide multiple callback functions that behave just like middleware, except that these
+      callbacks can invoke `next('route')` to bypass the remaining route callback(s). You can use
+      this mechanism to impose pre-conditions on a route, then pass control to subsequent routes if
+      there is no reason to proceed with the current route. Since [router](/api/router/) and
+      [app](/api/application/) implement the middleware interface, you can use them as you would any
+      other middleware function. For examples, see [Middleware callback function
+      examples](#middleware-callback-function-examples).
+    </Param>
+  </Fragment>
+</Signature>
+
+Routes HTTP QUERY requests to the specified path with the specified callback functions.
+For more information, see the [routing guide](/guide/routing/).
+
+<Alert type="alert">
+
+The HTTP QUERY method was standardized on June 15, 2026 as [RFC 10008](https://www.rfc-editor.org/rfc/rfc10008.html).
+Client and intermediary support is still limited. Verify that your target environments support the QUERY verb before relying on it in production.
+
+</Alert>
+
+The HTTP QUERY method ([RFC 10008](https://www.rfc-editor.org/rfc/rfc10008.html)) is designed for
+queries whose input is too large or too sensitive to encode in the URL. Unlike `GET`, a QUERY
+request carries a body containing the query input. Unlike `POST`, it is explicitly **safe and
+idempotent**, intermediaries and caches can retry it automatically, and the response is cacheable
+(with the request body included in the cache key).
+
+Use `app.query()` when query parameters would exceed URL length limits, contain sensitive data that
+should not appear in server logs or browser history, or are too complex to express cleanly as a URL
+query string, such as deeply nested filters or structured criteria.
+
+Because the query input travels in the request body, `req.body` is `undefined` until you mount a
+body-parsing middleware such as [`express.json()`](/api/express/#expressjson) or
+[`express.urlencoded()`](/api/express/#expressurlencoded) that matches the request's `Content-Type`.
+
+#### Example
+
+```js title="index.js"
+app.use(express.json()); // populate req.body for application/json payloads
+
+app.query('/search', (req, res) => {
+  // complex filter criteria arrive in req.body, not the URL
+  const results = db.search(req.body);
+  res.json(results);
+});
+```
+
+```ts title="index.ts"
+import express, { type Request, type Response } from 'express';
+
+app.use(express.json()); // populate req.body for application/json payloads
+
+app.query('/search', (req: Request, res: Response) => {
+  // complex filter criteria arrive in req.body, not the URL
+  const results = db.search(req.body);
+  res.json(results);
+});
+```
+
+### app.render()
+
+<Signature>
+  <Fragment slot="attributes">
+    <Param name="view" type="String">
+      The name of the view to render.
+    </Param>
+    <Param name="locals" type="Object" optional>
+      An object whose properties define local variables for the view.
+    </Param>
+    <Param name="callback" type="Function">
+      The callback invoked as `callback(err, html)` with the rendered HTML.
+    </Param>
+  </Fragment>
+</Signature>
 
 Returns the rendered HTML of a view via the `callback` function. It accepts an optional parameter
-that is an object containing local variables for the view. It is like [res.render()](#res.render),
+that is an object containing local variables for the view. It is like [res.render()](/api/response/#resrender),
 except it cannot send the rendered view to the client on its own.
 
 <Alert type="info">
@@ -725,7 +1250,15 @@ app.render('email', { name: 'Tobi' }, (err, html) => {
 });
 ```
 
-### app.route(path)
+### app.route()
+
+<Signature returns="Route">
+  <Fragment slot="attributes">
+    <Param name="path" type="String">
+      The path of the route to create.
+    </Param>
+  </Fragment>
+</Signature>
 
 Returns an instance of a single route, which you can then use to handle HTTP verbs with optional middleware.
 Use `app.route()` to avoid duplicate route names (and thus typo errors).
@@ -747,11 +1280,42 @@ app
   });
 ```
 
-### app.set(name, value)
+```ts
+import express, { type Express, type Request, type Response, type NextFunction } from 'express';
+
+const app: Express = express();
+
+app
+  .route('/events')
+  .all((req: Request, res: Response, next: NextFunction) => {
+    // runs for all HTTP verbs first
+    // think of it as route specific middleware!
+  })
+  .get((req: Request, res: Response, next: NextFunction) => {
+    res.json({});
+  })
+  .post((req: Request, res: Response, next: NextFunction) => {
+    // maybe add a new event...
+  });
+```
+
+### app.set()
+
+<Signature returns="Application">
+  <Fragment slot="attributes">
+    <Param name="name" type="String">
+      The name of the setting to assign. Certain names configure the server's behavior; see the [app
+      settings table](#application-settings).
+    </Param>
+    <Param name="value" type="any">
+      The value to assign to the setting.
+    </Param>
+  </Fragment>
+</Signature>
 
 Assigns setting `name` to `value`. You may store any value that you want,
 but certain names can be used to configure the behavior of the server. These
-special names are listed in the [app settings table](/en/api/application/app-set#app.settings.table).
+special names are listed in the [app settings table](#application-settings).
 
 Calling `app.set('foo', true)` for a Boolean property is the same as calling
 `app.enable('foo')`. Similarly, calling `app.set('foo', false)` for a Boolean
@@ -768,7 +1332,9 @@ app.get('title'); // "My Site"
 
 The following table lists application settings.
 
-Note that sub-apps will:
+<Alert type="info">
+
+Sub-apps will:
 
 - Not inherit the value of settings that have a default value. You must set the value in the sub-app.
 - Inherit the value of settings with no default value; these are explicitly noted in the table below.
@@ -776,27 +1342,118 @@ Note that sub-apps will:
 Exceptions: Sub-apps will inherit the value of `trust proxy` even though it has a default value (for backward-compatibility);
 Sub-apps will not inherit the value of `view cache` in production (when `NODE_ENV` is "production").
 
-| Property                 | Type            | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Default                                                                                             |
-| ------------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `case sensitive routing` | Boolean         | Enable case sensitivity. When enabled, "/Foo" and "/foo" are different routes. When disabled, "/Foo" and "/foo" are treated the same. **NOTE**: Sub-apps will inherit the value of this setting.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | N/A (undefined)                                                                                     |
-| `env`                    | String          | Environment mode. Be sure to set to "production" in a production environment; see [Production best practices: performance and reliability](/en/advanced/best-practice-performance#env).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `process.env.NODE_ENV` (`NODE_ENV` environment variable) or "development" if `NODE_ENV` is not set. |
-| `etag`                   | Varied          | Set the ETag response header. For possible values, see the `etag` options table below. [More about the HTTP ETag header](http://en.wikipedia.org/wiki/HTTP_ETag).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `weak`                                                                                              |
-| `jsonp callback name`    | String          | Specifies the default JSONP callback name.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | "callback"                                                                                          |
-| `json escape`            | Boolean         | Enable escaping JSON responses from the `res.json`, `res.jsonp`, and `res.send` APIs. This will escape the characters `<`, `>`, and `&` as Unicode escape sequences in JSON. The purpose of this is to assist with [mitigating certain types of persistent XSS attacks](https://blog.mozilla.org/security/2017/07/18/web-service-audits-firefox-accounts/) when clients sniff responses for HTML. **NOTE**: Sub-apps will inherit the value of this setting.                                                                                                                                                                                                                                                                                                                                                                                   | N/A (undefined)                                                                                     |
-| `json replacer`          | Varied          | The ['replacer' argument used by `JSON.stringify`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#The_replacer_parameter). **NOTE**: Sub-apps will inherit the value of this setting.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | N/A (undefined)                                                                                     |
-| `json spaces`            | Varied          | The ['space' argument used by `JSON.stringify`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#The_space_argument). This is typically set to the number of spaces to use to indent prettified JSON. **NOTE**: Sub-apps will inherit the value of this setting.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | N/A (undefined)                                                                                     |
-| `query parser`           | Varied          | Disable query parsing by setting the value to `false`, or set the query parser to use either "simple" or "extended" or a custom query string parsing function. The simple query parser is based on Node's native query parser, [querystring](http://nodejs.org/api/querystring.html). The extended query parser is based on [qs](https://www.npmjs.org/package/qs). A custom query string parsing function will receive the complete query string, and must return an object of query keys and their values.                                                                                                                                                                                                                                                                                                                                   | "simple"                                                                                            |
-| `strict routing`         | Boolean         | Enable strict routing. When enabled, the router treats "/foo" and "/foo/" as different. Otherwise, the router treats "/foo" and "/foo/" as the same. **NOTE**: Sub-apps will inherit the value of this setting.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | N/A (undefined)                                                                                     |
-| `subdomain offset`       | Number          | The number of dot-separated parts of the host to remove to access subdomain.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 2                                                                                                   |
-| `trust proxy`            | Varied          | Indicates the app is behind a front-facing proxy, and to use the `X-Forwarded-*` headers to determine the connection and the IP address of the client. NOTE: `X-Forwarded-*` headers are easily spoofed and the detected IP addresses are unreliable. When enabled, Express attempts to determine the IP address of the client connected through the front-facing proxy, or series of proxies. The `req.ips` property, then contains an array of IP addresses the client is connected through. To enable it, use the values described in the trust proxy options table below. The `trust proxy` setting is implemented using the [proxy-addr](https://www.npmjs.org/package/proxy-addr) package. For more information, see its documentation. **NOTE**: Sub-apps _will_ inherit the value of this setting, even though it has a default value. | `false` (disabled)                                                                                  |
-| `views`                  | String or Array | A directory or an array of directories for the application's views. If an array, the views are looked up in the order they occur in the array.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | `process.cwd() + '/views'`                                                                          |
-| `view cache`             | Boolean         | Enables view template compilation caching. **NOTE**: Sub-apps will not inherit the value of this setting in production (when `NODE_ENV` is "production").                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `true` in production, otherwise undefined.                                                          |
-| `view engine`            | String          | The default engine extension to use when omitted. **NOTE**: Sub-apps will inherit the value of this setting.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | N/A (undefined)                                                                                     |
-| `x-powered-by`           | Boolean         | Enables the "X-Powered-By: Express" HTTP header.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `true`                                                                                              |
+</Alert>
+
+<Signature attributesTitle="Settings">
+  <Fragment slot="attributes">
+    <Param name="case sensitive routing" type="Boolean" default="N/A (undefined)">
+      Enable case sensitivity. When enabled, "/Foo" and "/foo" are different routes. When disabled, "/Foo" and "/foo" are treated the same.
+
+      <Alert type="info">
+
+      Sub-apps will inherit the value of this setting.
+
+      </Alert>
+    </Param>
+    <Param name="env" type="String" default='process.env.NODE_ENV (NODE_ENV environment variable) or "development" if NODE_ENV is not set.'>
+      Environment mode. Be sure to set to "production" in a production environment; see [Production best practices: performance and reliability](/advanced/best-practice-performance#things-to-do-in-your-environment--setup).
+    </Param>
+    <Param name="etag" type="Boolean | String | Function" default="weak">
+      Set the ETag response header. For possible values, see the `etag` options table below. [More about the HTTP ETag header](https://en.wikipedia.org/wiki/HTTP_ETag).
+    </Param>
+    <Param name="jsonp callback name" type="String" default='"callback"'>
+      Specifies the default JSONP callback name.
+    </Param>
+    <Param name="json escape" type="Boolean" default="N/A (undefined)">
+      Enable escaping JSON responses from the `res.json`, `res.jsonp`, and `res.send` APIs. This will escape the characters `<`, `>`, and `&` as Unicode escape sequences in JSON. The purpose of this is to assist with [mitigating certain types of persistent XSS attacks](https://blog.mozilla.org/security/2017/07/18/web-service-audits-firefox-accounts/) when clients sniff responses for HTML.
+
+      <Alert type="info">
+
+      Sub-apps will inherit the value of this setting.
+
+      </Alert>
+    </Param>
+    <Param name="json replacer" type="Function | Array" default="N/A (undefined)">
+      The ['replacer' argument used by `JSON.stringify`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#the_replacer_parameter).
+
+      <Alert type="info">
+
+      Sub-apps will inherit the value of this setting.
+
+      </Alert>
+    </Param>
+    <Param name="json spaces" type="Number | String" default="N/A (undefined)">
+      The ['space' argument used by `JSON.stringify`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#the_space_parameter). This is typically set to the number of spaces to use to indent prettified JSON.
+
+      <Alert type="info">
+
+      Sub-apps will inherit the value of this setting.
+
+      </Alert>
+    </Param>
+    <Param name="query parser" type="Boolean | String | Function" default='"simple"'>
+      Disable query parsing by setting the value to `false`, or set the query parser to use either "simple" or "extended" or a custom query string parsing function. The simple query parser is based on Node's native query parser, [querystring](https://nodejs.org/api/querystring.html). The extended query parser is based on [qs](https://www.npmjs.com/package/qs). A custom query string parsing function will receive the complete query string, and must return an object of query keys and their values.
+    </Param>
+    <Param name="strict routing" type="Boolean" default="N/A (undefined)">
+      Enable strict routing. When enabled, the router treats "/foo" and "/foo/" as different. Otherwise, the router treats "/foo" and "/foo/" as the same.
+
+      <Alert type="info">
+
+      Sub-apps will inherit the value of this setting.
+
+      </Alert>
+    </Param>
+    <Param name="subdomain offset" type="Number" default="2">
+      The number of dot-separated parts of the host to remove to access subdomain.
+    </Param>
+    <Param name="trust proxy" type="Boolean | String | Number | Function | Array" default="false (disabled)">
+      Indicates the app is behind a front-facing proxy, and to use the `X-Forwarded-*` headers to determine the connection and the IP address of the client.
+
+      <Alert type="info">
+
+      `X-Forwarded-*` headers are easily spoofed and the detected IP addresses are unreliable.
+
+      </Alert>
+
+      When enabled, Express attempts to determine the IP address of the client connected through the front-facing proxy, or series of proxies. The `req.ips` property, then contains an array of IP addresses the client is connected through. To enable it, use the values described in the trust proxy options table below. The `trust proxy` setting is implemented using the [proxy-addr](https://www.npmjs.com/package/proxy-addr) package. For more information, see its documentation.
+
+      <Alert type="info">
+
+      Sub-apps _will_ inherit the value of this setting, even though it has a default value.
+
+      </Alert>
+    </Param>
+    <Param name="views" type="String | Array" default="process.cwd() + '/views'">
+      A directory or an array of directories for the application's views. If an array, the views are looked up in the order they occur in the array.
+    </Param>
+    <Param name="view cache" type="Boolean" default="true in production, otherwise undefined.">
+      Enables view template compilation caching.
+
+      <Alert type="info">
+
+      Sub-apps will not inherit the value of this setting in production (when `NODE_ENV` is "production").
+
+      </Alert>
+    </Param>
+    <Param name="view engine" type="String" default="N/A (undefined)">
+      The default engine extension to use when omitted.
+
+      <Alert type="info">
+
+      Sub-apps will inherit the value of this setting.
+
+      </Alert>
+    </Param>
+    <Param name="x-powered-by" type="Boolean" default="true">
+      Enables the "X-Powered-By: Express" HTTP header.
+    </Param>
+
+  </Fragment>
+</Signature>
 
 #### Options for `trust proxy` setting
 
-Read [Express behind proxies](/en/guide/behind-proxies) for more information.
+Read [Express behind proxies](/guide/behind-proxies) for more information.
 
 **Boolean**: If `true`, the client's IP address is understood as the left-most entry in the `X-Forwarded-*` header. If `false`, the app is understood as directly facing the Internet and the client's IP address is derived from `req.connection.remoteAddress`. This is the default setting.
 
@@ -848,15 +1505,25 @@ app.set('trust proxy', (ip) => {
 
 #### Options for `etag` setting
 
-**NOTE**: These settings apply only to dynamic files, not static files. The `express.static` middleware ignores these settings.
+<Alert type="info">
 
-The ETag functionality is implemented using the [etag](https://www.npmjs.org/package/etag) package. For more information, see its documentation.
+These settings apply only to dynamic files, not static files. The `express.static` middleware ignores these settings.
 
-| Type     | Value                                                                                    |
-| -------- | ---------------------------------------------------------------------------------------- |
-| Boolean  | `true` enables weak ETag. This is the default setting. `false` disables ETag altogether. |
-| String   | If "strong", enables strong ETag. If "weak", enables weak ETag.                          |
-| Function | Custom ETag function implementation. Use this only if you know what you are doing.       |
+</Alert>
+
+The ETag functionality is implemented using the [etag](https://www.npmjs.com/package/etag) package. For more information, see its documentation.
+
+<Signature attributesTitle="Values">
+  <Fragment slot="attributes">
+    <Param name="Boolean">
+      `true` enables weak ETag. This is the default setting. `false` disables ETag altogether.
+    </Param>
+    <Param name="String">If "strong", enables strong ETag. If "weak", enables weak ETag.</Param>
+    <Param name="Function">
+      Custom ETag function implementation. Use this only if you know what you are doing.
+    </Param>
+  </Fragment>
+</Signature>
 
 ```js
 app.set('etag', (body, encoding) => {
@@ -864,18 +1531,32 @@ app.set('etag', (body, encoding) => {
 });
 ```
 
-### app.use([path,] callback [, callback...])
+### app.use()
 
-Mounts the specified [middleware](/en/guide/using-middleware) function or functions
+<Signature>
+  <Fragment slot="attributes">
+    <Param name="path" type="String | RegExp | Array" optional>
+      The path for which the middleware function is invoked; can be any of: a string representing a
+      path, a path pattern, a regular expression pattern to match paths, or an array of combinations
+      of any of the above. For examples, see [Path examples](#path-examples).
+    </Param>
+    <Param name="callback" type="Function | Function[]">
+      Callback functions; can be: a middleware function, a series of middleware functions (separated
+      by commas), an array of middleware functions, or a combination of all of the above. You can
+      provide multiple callback functions that behave just like middleware, except that these
+      callbacks can invoke `next('route')` to bypass the remaining route callback(s). You can use
+      this mechanism to impose pre-conditions on a route, then pass control to subsequent routes if
+      there is no reason to proceed with the current route. Since [router](/api/router/) and
+      [app](/api/application/) implement the middleware interface, you can use them as you would any
+      other middleware function. For examples, see [Middleware callback function
+      examples](#middleware-callback-function-examples).
+    </Param>
+  </Fragment>
+</Signature>
+
+Mounts the specified [middleware](/guide/using-middleware) function or functions
 at the specified path:
 the middleware function is executed when the base of the requested path matches `path`.
-
-#### Arguments
-
-| Argument   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Default           |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| `path`     | The path for which the middleware function is invoked. It can be any of the following: a string representing a path, a path pattern, a regular expression pattern to match paths, or an array containing any combination of the above. For examples, see [Path examples](#path-examples).                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `'/'` (root path) |
-| `callback` | One or more callback functions. Accepted formats: a single middleware function, multiple middleware functions separated by commas, an array of middleware functions, or a combination of the above. You may provide multiple callbacks that behave like middleware. These can call `next('route')` to skip remaining callbacks for the current route. This is useful for conditional routing logic. If a callback throws an error or returns a rejected promise, `next(err)` is invoked automatically. Since both [router](#router) and [app](#application) implement the middleware interface, they can also be used as callback middleware. For examples, see [Middleware callback function examples](#middleware-callback-function-examples). | _None_            |
 
 #### Description
 
@@ -893,15 +1574,23 @@ app.use((req, res, next) => {
 });
 ```
 
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log('Time: %d', Date.now());
+  next();
+});
+```
+
 <Alert type="info">
-**NOTE**
 
 Sub-apps will:
 
 - Not inherit the value of settings that have a default value. You must set the value in the sub-app.
 - Inherit the value of settings with no default value.
 
-For details, see [Application settings](/en/5x/api/application/app-settings/).
+For details, see [Application settings](#application-settings).
 
 </Alert>
 
@@ -919,14 +1608,37 @@ app.get('/', (req, res) => {
 });
 ```
 
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+// this middleware will not allow the request to go beyond it
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.send('Hello World');
+});
+
+// requests will never reach this route
+app.get('/', (req: Request, res: Response) => {
+  res.send('Welcome');
+});
+```
+
 **Error-handling middleware**
 
-Error-handling middleware always takes _four_ arguments. You must provide four arguments to identify it as an error-handling middleware function. Even if you don't need to use the `next` object, you must specify it to maintain the signature. Otherwise, the `next` object will be interpreted as regular middleware and will fail to handle errors. For details about error-handling middleware, see: [Error handling](/en/guide/error-handling).
+Error-handling middleware always takes _four_ arguments. You must provide four arguments to identify it as an error-handling middleware function. Even if you don't need to use the `next` object, you must specify it to maintain the signature. Otherwise, the `next` object will be interpreted as regular middleware and will fail to handle errors. For details about error-handling middleware, see: [Error handling](/guide/error-handling).
 
 Define error-handling middleware functions in the same way as other middleware functions, except with four arguments instead of three, specifically with the signature `(err, req, res, next)`):
 
 ```js
 app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+```
+
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
@@ -945,10 +1657,26 @@ app.use('/abcd', (req, res, next) => {
 });
 ```
 
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+app.use('/abcd', (req: Request, res: Response, next: NextFunction) => {
+  next();
+});
+```
+
 **Path Pattern**: This will match paths starting with `/abcd` and `/abd`:
 
 ```js
 app.use('/ab{c}d', (req, res, next) => {
+  next();
+});
+```
+
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+app.use('/ab{c}d', (req: Request, res: Response, next: NextFunction) => {
   next();
 });
 ```
@@ -961,10 +1689,26 @@ app.use(/\/abc|\/xyz/, (req, res, next) => {
 });
 ```
 
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+app.use(/\/abc|\/xyz/, (req: Request, res: Response, next: NextFunction) => {
+  next();
+});
+```
+
 **Array**: This will match paths starting with `/abcd`, `/xyza`, `/lmn`, and `/pqr`:
 
 ```js
 app.use(['/abcd', '/xyza', /\/lmn|\/pqr/], (req, res, next) => {
+  next();
+});
+```
+
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+app.use(['/abcd', '/xyza', /\/lmn|\/pqr/], (req: Request, res: Response, next: NextFunction) => {
   next();
 });
 ```
@@ -982,6 +1726,14 @@ app.use((req, res, next) => {
 });
 ```
 
+```ts
+import { type Request, type Response, type NextFunction } from 'express';
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  next();
+});
+```
+
 A router is valid middleware.
 
 ```js
@@ -992,11 +1744,31 @@ router.get('/', (req, res, next) => {
 app.use(router);
 ```
 
+```ts
+import express, { type Request, type Response, type NextFunction } from 'express';
+
+const router = express.Router();
+router.get('/', (req: Request, res: Response, next: NextFunction) => {
+  next();
+});
+app.use(router);
+```
+
 An Express app is valid middleware.
 
 ```js
 const subApp = express();
 subApp.get('/', (req, res, next) => {
+  next();
+});
+app.use(subApp);
+```
+
+```ts
+import express, { type Express, type Request, type Response, type NextFunction } from 'express';
+
+const subApp: Express = express();
+subApp.get('/', (req: Request, res: Response, next: NextFunction) => {
   next();
 });
 app.use(subApp);
@@ -1018,6 +1790,22 @@ r2.get('/', (req, res, next) => {
 app.use(r1, r2);
 ```
 
+```ts
+import express, { type Request, type Response, type NextFunction } from 'express';
+
+const r1 = express.Router();
+r1.get('/', (req: Request, res: Response, next: NextFunction) => {
+  next();
+});
+
+const r2 = express.Router();
+r2.get('/', (req: Request, res: Response, next: NextFunction) => {
+  next();
+});
+
+app.use(r1, r2);
+```
+
 **Array**: Use an array to group middleware logically.
 
 ```js
@@ -1028,6 +1816,22 @@ r1.get('/', (req, res, next) => {
 
 const r2 = express.Router();
 r2.get('/', (req, res, next) => {
+  next();
+});
+
+app.use([r1, r2]);
+```
+
+```ts
+import express, { type Request, type Response, type NextFunction } from 'express';
+
+const r1 = express.Router();
+r1.get('/', (req: Request, res: Response, next: NextFunction) => {
+  next();
+});
+
+const r2 = express.Router();
+r2.get('/', (req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
@@ -1062,7 +1866,35 @@ subApp.get('/', (req, res, next) => {
 app.use(mw1, [mw2, r1, r2], subApp);
 ```
 
-Following are some examples of using the [express.static](/en/guide/using-middleware#middleware.built-in)
+```ts
+import express, { type Express, type Request, type Response, type NextFunction } from 'express';
+
+function mw1(req: Request, res: Response, next: NextFunction) {
+  next();
+}
+function mw2(req: Request, res: Response, next: NextFunction) {
+  next();
+}
+
+const r1 = express.Router();
+r1.get('/', (req: Request, res: Response, next: NextFunction) => {
+  next();
+});
+
+const r2 = express.Router();
+r2.get('/', (req: Request, res: Response, next: NextFunction) => {
+  next();
+});
+
+const subApp: Express = express();
+subApp.get('/', (req: Request, res: Response, next: NextFunction) => {
+  next();
+});
+
+app.use(mw1, [mw2, r1, r2], subApp);
+```
+
+Following are some examples of using the [express.static](/guide/using-middleware/#built-in-middleware)
 middleware in an Express app.
 
 Serve static content for the app from the "public" directory in the application directory:
